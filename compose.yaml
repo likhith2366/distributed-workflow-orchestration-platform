@@ -1,0 +1,25 @@
+# Journal backend: one durable coordinator, independently scaled HTTP workers.
+#   API_TOKEN=... docker compose up --build --scale worker=2
+services:
+  coordinator:
+    build: .
+    environment:
+      API_TOKEN: ${API_TOKEN:?Set API_TOKEN to at least 24 characters}
+      WORKERS: "0"
+    ports:
+      - "127.0.0.1:${HOST_PORT:-8080}:8080"
+    volumes:
+      - workflow-data:/app/data
+    restart: unless-stopped
+  worker:
+    build: .
+    environment:
+      API_TOKEN: ${API_TOKEN:?Set API_TOKEN to at least 24 characters}
+      CONDUCTOR_ROLE: worker
+      COORDINATOR_URL: http://coordinator:8080
+      WORKERS: "8"
+    depends_on:
+      - coordinator
+    restart: unless-stopped
+volumes:
+  workflow-data:

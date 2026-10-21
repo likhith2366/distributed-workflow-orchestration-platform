@@ -1,0 +1,50 @@
+# The managed-service architecture on one machine: LocalStack provides DynamoDB, SQS, S3 and
+# EventBridge; two stateless API replicas and two worker replicas share it.
+#   API_TOKEN=... docker compose -f compose.localstack.yaml up --build --scale api=2 --scale worker=2
+# Only `localstack` is needed for `python scripts/integration_test.py --store dynamodb`.
+x-aws-env: &aws-env
+  CONDUCTOR_STORE: dynamodb
+  CONDUCTOR_AWS_ENDPOINT: http://localstack:4566
+  CONDUCTOR_CREATE_RESOURCES: "true"
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: test
+  AWS_SECRET_ACCESS_KEY: test
+  API_TOKEN: ${API_TOKEN:?Set API_TOKEN to at least 24 characters}
+
+services:
+  localstack:
+    image: localstack/localstack:4.4.0
+    environment:
+      SERVICES: dynamodb,sqs,s3,events
+    ports:
+      - "127.0.0.1:4566:4566"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 3s
+      retries: 20
+  api:
+    build: .
+    profiles: [app]
+    environment:
+      <<: *aws-env
+      WORKERS: "0"
+    expose: ["8080"]
+    depends_on:
+      localstack: {condition: service_healthy}
+  gateway:
+    image: nginx:1.27-alpine
+    profiles: [app]
+    volumes:
+      - ./scripts/nginx-api.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "127.0.0.1:${HOST_PORT:-8080}:8080"
+    depends_on: [api]
+  worker:
+    build: .
+    profiles: [app]
+    environment:
+      <<: *aws-env
+      CONDUCTOR_ROLE: worker
+      WORKERS: "8"
+    depends_on:
+      localstack: {condition: service_healthy}
