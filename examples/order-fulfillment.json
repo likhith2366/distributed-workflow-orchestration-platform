@@ -1,0 +1,13 @@
+{
+  "name": "retail-order-fulfillment",
+  "version": "1",
+  "steps": [
+    {"id":"reserveInventory","action":"ledger","value":{"sku":"BOOK-001","quantity":1},"compensate":"ledger"},
+    {"id":"authorizePayment","action":"ledger","dependsOn":["reserveInventory"],"value":{"amountCents":2599},"compensate":"ledger","failUntil":1,"backoffMs":250},
+    {"id":"fraudReview","action":"approval","dependsOn":["authorizePayment"]},
+    {"id":"packEast","action":"sleep","durationMs":700,"dependsOn":["fraudReview"]},
+    {"id":"packWest","action":"sleep","durationMs":900,"dependsOn":["fraudReview"]},
+    {"id":"dispatch","action":"wait","delayMs":1000,"dependsOn":["packEast","packWest"]},
+    {"id":"notifyCustomer","action":"echo","dependsOn":["dispatch"],"value":{"notification":"Order dispatched"}}
+  ]
+}

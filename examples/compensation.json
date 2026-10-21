@@ -1,0 +1,9 @@
+{
+  "name":"fulfillment-compensation",
+  "version":"1",
+  "steps":[
+    {"id":"reserve","action":"ledger","compensate":"ledger","value":{"inventory":"reserved"}},
+    {"id":"charge","action":"ledger","compensate":"ledger","dependsOn":["reserve"],"value":{"payment":"authorized"}},
+    {"id":"ship","action":"fail","maxAttempts":2,"backoffMs":100,"dependsOn":["charge"]}
+  ]
+}
