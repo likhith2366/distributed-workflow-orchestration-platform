@@ -1,0 +1,710 @@
+{
+  "label": "canonical-curve",
+  "configs": {
+    "canonical": "-Xmx3g -XX:MaxGCPauseMillis=5"
+  },
+  "points": [
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 1,
+      "clients": 1,
+      "workflows": 3000,
+      "steadyWfs": [
+        574.2,
+        673.1,
+        568.8
+      ],
+      "medianSteadyWfs": 574.2,
+      "p50Ms": 1,
+      "p99Ms": 6,
+      "cpuCores": 1.67,
+      "meanBatch": 1.09,
+      "maxBatch": 2,
+      "flushShare": 0.411,
+      "executeShare": 0.124,
+      "fsyncMsPerFlush": 0.19,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2570,
+      "p50Micros": 1365,
+      "p99Micros": 5738,
+      "p50MicrosRuns": [
+        1365,
+        1216,
+        1446
+      ],
+      "p99MicrosRuns": [
+        5738,
+        4448,
+        5409
+      ],
+      "batchSizeP50": 1,
+      "batchSizeP99": 2,
+      "executeMicrosPerCommand": 46.4,
+      "engineCommand": {
+        "samples": 15001,
+        "totalP50Micros": 193,
+        "totalP99Micros": 995,
+        "queueWaitP50Micros": 10,
+        "queueWaitP99Micros": 86,
+        "batchFormationP50Micros": 32,
+        "batchFormationP99Micros": 343,
+        "writeP50Micros": 148,
+        "writeP99Micros": 629,
+        "slowest1PctCount": 151,
+        "slowest1PctQueueWaitShare": 0.08716668202508016,
+        "slowest1PctBatchFormationShare": 0.3780527077831697,
+        "slowest1PctWriteShare": 0.5341935751655273
+      },
+      "ledgerCommand": {
+        "samples": 6000,
+        "totalP50Micros": 182,
+        "totalP99Micros": 818,
+        "queueWaitP50Micros": 11,
+        "queueWaitP99Micros": 79,
+        "batchFormationP50Micros": 11,
+        "batchFormationP99Micros": 82,
+        "writeP50Micros": 156,
+        "writeP99Micros": 671,
+        "slowest1PctCount": 62,
+        "slowest1PctQueueWaitShare": 0.10759553536644187,
+        "slowest1PctBatchFormationShare": 0.116235501709883,
+        "slowest1PctWriteShare": 0.7754363484291914
+      },
+      "gc": {
+        "maxPauseMs": 3,
+        "totalPauseMs": 54,
+        "pauses": 27
+      },
+      "diskProbeMs": [
+        0.765,
+        0.699,
+        0.718
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 2,
+      "clients": 2,
+      "workflows": 3000,
+      "steadyWfs": [
+        844.0,
+        1124.4,
+        669.9
+      ],
+      "medianSteadyWfs": 844.0,
+      "p50Ms": 1,
+      "p99Ms": 9,
+      "cpuCores": 2.23,
+      "meanBatch": 1.94,
+      "maxBatch": 4,
+      "flushShare": 0.462,
+      "executeShare": 0.156,
+      "fsyncMsPerFlush": 0.229,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2580,
+      "p50Micros": 1638,
+      "p99Micros": 8295,
+      "p50MicrosRuns": [
+        1638,
+        1479,
+        2116
+      ],
+      "p99MicrosRuns": [
+        8295,
+        5019,
+        11514
+      ],
+      "batchSizeP50": 2,
+      "batchSizeP99": 4,
+      "executeMicrosPerCommand": 38.9,
+      "engineCommand": {
+        "samples": 14997,
+        "totalP50Micros": 273,
+        "totalP99Micros": 1603,
+        "queueWaitP50Micros": 24,
+        "queueWaitP99Micros": 402,
+        "batchFormationP50Micros": 35,
+        "batchFormationP99Micros": 409,
+        "writeP50Micros": 184,
+        "writeP99Micros": 1017,
+        "slowest1PctCount": 150,
+        "slowest1PctQueueWaitShare": 0.2284745864478441,
+        "slowest1PctBatchFormationShare": 0.16956068390967446,
+        "slowest1PctWriteShare": 0.601623897382146
+      },
+      "ledgerCommand": {
+        "samples": 6000,
+        "totalP50Micros": 220,
+        "totalP99Micros": 1736,
+        "queueWaitP50Micros": 16,
+        "queueWaitP99Micros": 461,
+        "batchFormationP50Micros": 10,
+        "batchFormationP99Micros": 102,
+        "writeP50Micros": 187,
+        "writeP99Micros": 1221,
+        "slowest1PctCount": 61,
+        "slowest1PctQueueWaitShare": 0.20471414141086183,
+        "slowest1PctBatchFormationShare": 0.08737144781414953,
+        "slowest1PctWriteShare": 0.7075702881391588
+      },
+      "gc": {
+        "maxPauseMs": 3,
+        "totalPauseMs": 53,
+        "pauses": 24
+      },
+      "diskProbeMs": [
+        0.813,
+        0.697,
+        0.799
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 4,
+      "clients": 4,
+      "workflows": 3000,
+      "steadyWfs": [
+        1766.4,
+        1841.7,
+        1980.9
+      ],
+      "medianSteadyWfs": 1841.7,
+      "p50Ms": 1,
+      "p99Ms": 6,
+      "cpuCores": 3.25,
+      "meanBatch": 3.61,
+      "maxBatch": 8,
+      "flushShare": 0.466,
+      "executeShare": 0.226,
+      "fsyncMsPerFlush": 0.206,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2581,
+      "p50Micros": 1867,
+      "p99Micros": 5760,
+      "p50MicrosRuns": [
+        1929,
+        1867,
+        1829
+      ],
+      "p99MicrosRuns": [
+        6169,
+        5760,
+        5476
+      ],
+      "batchSizeP50": 4,
+      "batchSizeP99": 8,
+      "executeMicrosPerCommand": 27.6,
+      "engineCommand": {
+        "samples": 14884,
+        "totalP50Micros": 300,
+        "totalP99Micros": 1509,
+        "queueWaitP50Micros": 55,
+        "queueWaitP99Micros": 487,
+        "batchFormationP50Micros": 40,
+        "batchFormationP99Micros": 492,
+        "writeP50Micros": 180,
+        "writeP99Micros": 673,
+        "slowest1PctCount": 149,
+        "slowest1PctQueueWaitShare": 0.33177787143817655,
+        "slowest1PctBatchFormationShare": 0.29039955668504247,
+        "slowest1PctWriteShare": 0.3773621484453502
+      },
+      "ledgerCommand": {
+        "samples": 6000,
+        "totalP50Micros": 212,
+        "totalP99Micros": 936,
+        "queueWaitP50Micros": 18,
+        "queueWaitP99Micros": 228,
+        "batchFormationP50Micros": 9,
+        "batchFormationP99Micros": 77,
+        "writeP50Micros": 178,
+        "writeP99Micros": 668,
+        "slowest1PctCount": 61,
+        "slowest1PctQueueWaitShare": 0.18257056963653912,
+        "slowest1PctBatchFormationShare": 0.13394556569243055,
+        "slowest1PctWriteShare": 0.6828303440052669
+      },
+      "gc": {
+        "maxPauseMs": 5,
+        "totalPauseMs": 44,
+        "pauses": 19
+      },
+      "diskProbeMs": [
+        0.722,
+        0.654,
+        0.697
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 8,
+      "clients": 8,
+      "workflows": 3000,
+      "steadyWfs": [
+        2501.2,
+        2833.6,
+        2238.6
+      ],
+      "medianSteadyWfs": 2501.2,
+      "p50Ms": 2,
+      "p99Ms": 10,
+      "cpuCores": 4.33,
+      "meanBatch": 6.13,
+      "maxBatch": 16,
+      "flushShare": 0.432,
+      "executeShare": 0.31,
+      "fsyncMsPerFlush": 0.244,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2604,
+      "p50Micros": 2862,
+      "p99Micros": 8033,
+      "p50MicrosRuns": [
+        2862,
+        2369,
+        3045
+      ],
+      "p99MicrosRuns": [
+        8033,
+        6870,
+        9710
+      ],
+      "batchSizeP50": 6,
+      "batchSizeP99": 16,
+      "executeMicrosPerCommand": 28.7,
+      "engineCommand": {
+        "samples": 14847,
+        "totalP50Micros": 454,
+        "totalP99Micros": 2983,
+        "queueWaitP50Micros": 123,
+        "queueWaitP99Micros": 935,
+        "batchFormationP50Micros": 74,
+        "batchFormationP99Micros": 1007,
+        "writeP50Micros": 220,
+        "writeP99Micros": 700,
+        "slowest1PctCount": 149,
+        "slowest1PctQueueWaitShare": 0.31235608732897785,
+        "slowest1PctBatchFormationShare": 0.41667029721211274,
+        "slowest1PctWriteShare": 0.2707094317744238
+      },
+      "ledgerCommand": {
+        "samples": 6000,
+        "totalP50Micros": 271,
+        "totalP99Micros": 831,
+        "queueWaitP50Micros": 32,
+        "queueWaitP99Micros": 364,
+        "batchFormationP50Micros": 13,
+        "batchFormationP99Micros": 101,
+        "writeP50Micros": 204,
+        "writeP99Micros": 571,
+        "slowest1PctCount": 61,
+        "slowest1PctQueueWaitShare": 0.3762965117781357,
+        "slowest1PctBatchFormationShare": 0.142055676558792,
+        "slowest1PctWriteShare": 0.48100992330315223
+      },
+      "gc": {
+        "pauses": 18,
+        "totalPauseMs": 44,
+        "maxPauseMs": 5
+      },
+      "diskProbeMs": [
+        0.652,
+        0.686,
+        0.765
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 16,
+      "clients": 16,
+      "workflows": 4000,
+      "steadyWfs": [
+        2651.5,
+        2886.2,
+        2662.1
+      ],
+      "medianSteadyWfs": 2662.1,
+      "p50Ms": 5,
+      "p99Ms": 22,
+      "cpuCores": 3.69,
+      "meanBatch": 13.92,
+      "maxBatch": 32,
+      "flushShare": 0.315,
+      "executeShare": 0.365,
+      "fsyncMsPerFlush": 0.379,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2632,
+      "p50Micros": 4842,
+      "p99Micros": 14855,
+      "p50MicrosRuns": [
+        4371,
+        4719,
+        4842
+      ],
+      "p99MicrosRuns": [
+        15028,
+        14237,
+        14855
+      ],
+      "batchSizeP50": 16,
+      "batchSizeP99": 32,
+      "executeMicrosPerCommand": 31.9,
+      "engineCommand": {
+        "samples": 19929,
+        "totalP50Micros": 811,
+        "totalP99Micros": 5126,
+        "queueWaitP50Micros": 236,
+        "queueWaitP99Micros": 2588,
+        "batchFormationP50Micros": 154,
+        "batchFormationP99Micros": 3007,
+        "writeP50Micros": 331,
+        "writeP99Micros": 1543,
+        "slowest1PctCount": 200,
+        "slowest1PctQueueWaitShare": 0.4811769825203043,
+        "slowest1PctBatchFormationShare": 0.3622137708673887,
+        "slowest1PctWriteShare": 0.1564481123495913
+      },
+      "ledgerCommand": {
+        "samples": 8000,
+        "totalP50Micros": 398,
+        "totalP99Micros": 3621,
+        "queueWaitP50Micros": 62,
+        "queueWaitP99Micros": 1788,
+        "batchFormationP50Micros": 25,
+        "batchFormationP99Micros": 273,
+        "writeP50Micros": 291,
+        "writeP99Micros": 1977,
+        "slowest1PctCount": 81,
+        "slowest1PctQueueWaitShare": 0.4050248043361901,
+        "slowest1PctBatchFormationShare": 0.09607197627403118,
+        "slowest1PctWriteShare": 0.49872236563257505
+      },
+      "gc": {
+        "maxPauseMs": 5,
+        "pauses": 23,
+        "totalPauseMs": 65
+      },
+      "diskProbeMs": [
+        0.734,
+        0.701,
+        0.754
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 32,
+      "clients": 32,
+      "workflows": 8000,
+      "steadyWfs": [
+        2717.5,
+        3979.2,
+        4234.9
+      ],
+      "medianSteadyWfs": 3979.2,
+      "p50Ms": 6,
+      "p99Ms": 35,
+      "cpuCores": 4.16,
+      "meanBatch": 20.41,
+      "maxBatch": 64,
+      "flushShare": 0.283,
+      "executeShare": 0.419,
+      "fsyncMsPerFlush": 0.334,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2644,
+      "p50Micros": 6012,
+      "p99Micros": 30358,
+      "p50MicrosRuns": [
+        8447,
+        6012,
+        6513
+      ],
+      "p99MicrosRuns": [
+        43718,
+        30358,
+        19300
+      ],
+      "batchSizeP50": 17,
+      "batchSizeP99": 64,
+      "executeMicrosPerCommand": 24.3,
+      "engineCommand": {
+        "samples": 39862,
+        "totalP50Micros": 998,
+        "totalP99Micros": 7182,
+        "queueWaitP50Micros": 291,
+        "queueWaitP99Micros": 4007,
+        "batchFormationP50Micros": 275,
+        "batchFormationP99Micros": 3224,
+        "writeP50Micros": 326,
+        "writeP99Micros": 1793,
+        "slowest1PctCount": 399,
+        "slowest1PctQueueWaitShare": 0.5133714595072383,
+        "slowest1PctBatchFormationShare": 0.3299213185035808,
+        "slowest1PctWriteShare": 0.15662205625033876
+      },
+      "ledgerCommand": {
+        "samples": 16000,
+        "totalP50Micros": 404,
+        "totalP99Micros": 5480,
+        "queueWaitP50Micros": 81,
+        "queueWaitP99Micros": 1439,
+        "batchFormationP50Micros": 38,
+        "batchFormationP99Micros": 391,
+        "writeP50Micros": 241,
+        "writeP99Micros": 1237,
+        "slowest1PctCount": 161,
+        "slowest1PctQueueWaitShare": 0.5591178371161324,
+        "slowest1PctBatchFormationShare": 0.19966875740812914,
+        "slowest1PctWriteShare": 0.24103432198702548
+      },
+      "gc": {
+        "pauses": 29,
+        "totalPauseMs": 122,
+        "maxPauseMs": 7
+      },
+      "diskProbeMs": [
+        0.803,
+        0.978,
+        0.721
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 64,
+      "clients": 64,
+      "workflows": 16000,
+      "steadyWfs": [
+        6314.7,
+        6842.5,
+        6464.5
+      ],
+      "medianSteadyWfs": 6464.5,
+      "p50Ms": 8,
+      "p99Ms": 45,
+      "cpuCores": 3.36,
+      "meanBatch": 59.32,
+      "maxBatch": 128,
+      "flushShare": 0.191,
+      "executeShare": 0.448,
+      "fsyncMsPerFlush": 0.435,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2656,
+      "p50Micros": 7071,
+      "p99Micros": 29303,
+      "p50MicrosRuns": [
+        7173,
+        6926,
+        7071
+      ],
+      "p99MicrosRuns": [
+        26324,
+        20267,
+        29303
+      ],
+      "batchSizeP50": 64,
+      "batchSizeP99": 128,
+      "executeMicrosPerCommand": 17.9,
+      "engineCommand": {
+        "samples": 65536,
+        "totalP50Micros": 1237,
+        "totalP99Micros": 7514,
+        "queueWaitP50Micros": 418,
+        "queueWaitP99Micros": 2656,
+        "batchFormationP50Micros": 338,
+        "batchFormationP99Micros": 4160,
+        "writeP50Micros": 361,
+        "writeP99Micros": 1428,
+        "slowest1PctCount": 657,
+        "slowest1PctQueueWaitShare": 0.3010088025901097,
+        "slowest1PctBatchFormationShare": 0.5318291965687084,
+        "slowest1PctWriteShare": 0.1670445371740768
+      },
+      "ledgerCommand": {
+        "samples": 32000,
+        "totalP50Micros": 444,
+        "totalP99Micros": 6340,
+        "queueWaitP50Micros": 93,
+        "queueWaitP99Micros": 3708,
+        "batchFormationP50Micros": 64,
+        "batchFormationP99Micros": 2481,
+        "writeP50Micros": 267,
+        "writeP99Micros": 1937,
+        "slowest1PctCount": 321,
+        "slowest1PctQueueWaitShare": 0.4784714643908452,
+        "slowest1PctBatchFormationShare": 0.33394244935168266,
+        "slowest1PctWriteShare": 0.18750414704353155
+      },
+      "gc": {
+        "pauses": 41,
+        "maxPauseMs": 10,
+        "totalPauseMs": 194
+      },
+      "diskProbeMs": [
+        0.748,
+        0.702,
+        1.063
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 128,
+      "clients": 128,
+      "workflows": 32000,
+      "steadyWfs": [
+        9407.8,
+        7793.7,
+        8911.3
+      ],
+      "medianSteadyWfs": 8911.3,
+      "p50Ms": 11,
+      "p99Ms": 79,
+      "cpuCores": 3.24,
+      "meanBatch": 89.22,
+      "maxBatch": 256,
+      "flushShare": 0.162,
+      "executeShare": 0.51,
+      "fsyncMsPerFlush": 0.42,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2667,
+      "p50Micros": 10794,
+      "p99Micros": 30451,
+      "p50MicrosRuns": [
+        10585,
+        12946,
+        10794
+      ],
+      "p99MicrosRuns": [
+        31474,
+        47000,
+        30451
+      ],
+      "batchSizeP50": 128,
+      "batchSizeP99": 256,
+      "executeMicrosPerCommand": 14.3,
+      "engineCommand": {
+        "samples": 65536,
+        "totalP50Micros": 2034,
+        "totalP99Micros": 11022,
+        "queueWaitP50Micros": 695,
+        "queueWaitP99Micros": 8570,
+        "batchFormationP50Micros": 587,
+        "batchFormationP99Micros": 8449,
+        "writeP50Micros": 471,
+        "writeP99Micros": 1275,
+        "slowest1PctCount": 657,
+        "slowest1PctQueueWaitShare": 0.3916757035798561,
+        "slowest1PctBatchFormationShare": 0.4035096322788066,
+        "slowest1PctWriteShare": 0.20474227832627132
+      },
+      "ledgerCommand": {
+        "samples": 64000,
+        "totalP50Micros": 557,
+        "totalP99Micros": 6400,
+        "queueWaitP50Micros": 128,
+        "queueWaitP99Micros": 2405,
+        "batchFormationP50Micros": 106,
+        "batchFormationP99Micros": 1026,
+        "writeP50Micros": 296,
+        "writeP99Micros": 978,
+        "slowest1PctCount": 641,
+        "slowest1PctQueueWaitShare": 0.32249664282370344,
+        "slowest1PctBatchFormationShare": 0.43711351415562455,
+        "slowest1PctWriteShare": 0.24026934687762824
+      },
+      "gc": {
+        "maxPauseMs": 9,
+        "totalPauseMs": 332,
+        "pauses": 59
+      },
+      "diskProbeMs": [
+        0.706,
+        0.635,
+        0.71
+      ]
+    },
+    {
+      "config": "canonical",
+      "activityMs": 0,
+      "workers": 256,
+      "clients": 256,
+      "workflows": 64000,
+      "steadyWfs": [
+        10405.7,
+        8447.8,
+        10116.3
+      ],
+      "medianSteadyWfs": 10116.3,
+      "p50Ms": 21,
+      "p99Ms": 110,
+      "cpuCores": 3.14,
+      "meanBatch": 94.83,
+      "maxBatch": 256,
+      "flushShare": 0.156,
+      "executeShare": 0.594,
+      "fsyncMsPerFlush": 0.397,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2667,
+      "p50Micros": 20362,
+      "p99Micros": 50317,
+      "p50MicrosRuns": [
+        20607,
+        23514,
+        20362
+      ],
+      "p99MicrosRuns": [
+        64722,
+        78011,
+        50317
+      ],
+      "batchSizeP50": 16,
+      "batchSizeP99": 256,
+      "executeMicrosPerCommand": 14.2,
+      "engineCommand": {
+        "samples": 65536,
+        "totalP50Micros": 3114,
+        "totalP99Micros": 16674,
+        "queueWaitP50Micros": 1511,
+        "queueWaitP99Micros": 14043,
+        "batchFormationP50Micros": 1100,
+        "batchFormationP99Micros": 12117,
+        "writeP50Micros": 484,
+        "writeP99Micros": 1160,
+        "slowest1PctCount": 657,
+        "slowest1PctQueueWaitShare": 0.5391916934111219,
+        "slowest1PctBatchFormationShare": 0.42563213787943804,
+        "slowest1PctWriteShare": 0.035128170188190054
+      },
+      "ledgerCommand": {
+        "samples": 65536,
+        "totalP50Micros": 561,
+        "totalP99Micros": 1495,
+        "queueWaitP50Micros": 144,
+        "queueWaitP99Micros": 789,
+        "batchFormationP50Micros": 84,
+        "batchFormationP99Micros": 642,
+        "writeP50Micros": 269,
+        "writeP99Micros": 666,
+        "slowest1PctCount": 657,
+        "slowest1PctQueueWaitShare": 0.5742165455711509,
+        "slowest1PctBatchFormationShare": 0.20885663154010506,
+        "slowest1PctWriteShare": 0.21659979827090955
+      },
+      "gc": {
+        "maxPauseMs": 12,
+        "pauses": 88,
+        "totalPauseMs": 663
+      },
+      "diskProbeMs": [
+        0.738,
+        0.741,
+        0.679
+      ]
+    }
+  ]
+}
