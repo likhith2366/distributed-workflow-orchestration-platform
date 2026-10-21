@@ -23,7 +23,11 @@ public final class FsyncProbe {
         // prealloc: overwrite inside an already-sized file, as a segment-preallocating WAL would.
         // dsync / prealloc-dsync: open with DSYNC (Windows: FILE_FLAG_WRITE_THROUGH) and skip force().
         String mode=o.getOrDefault("mode","append");
-        boolean prealloc=mode.startsWith("prealloc"),dsync=mode.endsWith("dsync");
+        // direct / direct-dsync: bypass the OS cache (FILE_FLAG_NO_BUFFERING / O_DIRECT) with aligned
+        // 4 KiB writes into a preallocated file, without and with FUA. A drive that honours FUA must do
+        // measurably more work for the second; one that acknowledges FUA from volatile cache will not.
+        boolean direct=mode.startsWith("direct");
+        boolean prealloc=mode.startsWith("prealloc")||direct,dsync=mode.endsWith("dsync");
         Path dir=Files.createTempDirectory("conductor-fsync-");
         List<Object> rows=new ArrayList<>();
         try {
@@ -40,12 +44,16 @@ public final class FsyncProbe {
                         }
                         Set<StandardOpenOption> options=new HashSet<>(List.of(StandardOpenOption.CREATE,StandardOpenOption.WRITE));
                         if(dsync)options.add(StandardOpenOption.DSYNC);
-                        try(FileChannel ch=FileChannel.open(file,options)) {
-                            ByteBuffer b=ByteBuffer.allocate(1024);long position=prealloc?0:ch.size();
+                        java.nio.file.OpenOption[] all=options.toArray(new java.nio.file.OpenOption[0]);
+                        if(direct){all=java.util.Arrays.copyOf(all,all.length+1);all[all.length-1]=com.sun.nio.file.ExtendedOpenOption.DIRECT;}
+                        int size=direct?4096:1024;
+                        try(FileChannel ch=FileChannel.open(file,all)) {
+                            ByteBuffer b=direct?ByteBuffer.allocateDirect(size*2).alignedSlice(size).limit(size).slice():ByteBuffer.allocate(size);
+                            long position=prealloc?0:ch.size();
                             while(System.nanoTime()<deadline) {
-                                b.clear();ch.write(b,position);position+=1024;
+                                b.clear();ch.write(b,position);position+=size;
                                 if(prealloc&&position>=(64L<<20))position=0;
-                                if(!dsync)ch.force(true);
+                                if(!dsync&&!direct)ch.force(true);
                                 counts[id]++;
                             }
                         }
