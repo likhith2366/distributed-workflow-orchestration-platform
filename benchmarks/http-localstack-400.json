@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-10-20T16:02:25.752056+00:00",
+  "label": "docker compose: localstack 4.4 emulator, 2 api + 2 worker replicas (8 workers each)",
+  "target": "http://127.0.0.1:18080",
+  "scope": "HTTP closed loop through the public API",
+  "backend": "dynamodb",
+  "workflows": 400,
+  "clients": 16,
+  "pollMs": 250,
+  "succeeded": 400,
+  "failed": 0,
+  "failures": [],
+  "seconds": 108.065,
+  "workflowsPerSecond": 3.7,
+  "workflowP50Ms": 3746.4,
+  "workflowP99Ms": 15156.2,
+  "clientCpuSeconds": 7.67,
+  "clientHost": "Windows-10-10.0.26200-SP0",
+  "serverMetrics": {
+    "engine": {
+      "backend": "dynamodb",
+      "executions": 804,
+      "active": 0,
+      "durableTransitions": 5636,
+      "statuses": {
+        "COMPENSATED": 1,
+        "SUCCEEDED": 803
+      },
+      "leaseRenewals": 8,
+      "contentionRetries": 7,
+      "outboxRelayed": 2,
+      "bestEffortCounters": [
+        "durableTransitions",
+        "leaseRenewals",
+        "contentionRetries",
+        "outboxRelayed"
+      ]
+    },
+    "workers": {
+      "mode": "none"
+    },
+    "ledgerEffects": 1608
+  }
+}
