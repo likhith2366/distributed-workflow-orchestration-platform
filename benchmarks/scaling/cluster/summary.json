@@ -1,0 +1,134 @@
+{
+  "label": "cluster",
+  "kind": "cluster",
+  "points": [
+    {
+      "activityMs": 10,
+      "processes": 1,
+      "workers": 4,
+      "clients": 64,
+      "shards": 1,
+      "steadyWfs": [
+        48.9,
+        61.3
+      ],
+      "medianSteadyWfs": 55.1,
+      "p50Ms": 1029,
+      "p99Ms": 1227,
+      "allProcessesCpuCores": 1.25,
+      "meanBatch": 2.68
+    },
+    {
+      "activityMs": 10,
+      "processes": 2,
+      "workers": 8,
+      "clients": 64,
+      "shards": 1,
+      "steadyWfs": [
+        112.8,
+        114.4
+      ],
+      "medianSteadyWfs": 113.6,
+      "p50Ms": 561,
+      "p99Ms": 784,
+      "allProcessesCpuCores": 2.37,
+      "meanBatch": 3.15
+    },
+    {
+      "activityMs": 10,
+      "processes": 4,
+      "workers": 16,
+      "clients": 64,
+      "shards": 1,
+      "steadyWfs": [
+        185.6,
+        188.0
+      ],
+      "medianSteadyWfs": 186.8,
+      "p50Ms": 334,
+      "p99Ms": 786,
+      "allProcessesCpuCores": 4.78,
+      "meanBatch": 2.35
+    },
+    {
+      "activityMs": 10,
+      "processes": 8,
+      "workers": 32,
+      "clients": 128,
+      "shards": 1,
+      "steadyWfs": [
+        274.3,
+        286.3
+      ],
+      "medianSteadyWfs": 280.3,
+      "p50Ms": 405,
+      "p99Ms": 1334,
+      "allProcessesCpuCores": 6.38,
+      "meanBatch": 2.69
+    },
+    {
+      "activityMs": 0,
+      "processes": 1,
+      "workers": 4,
+      "clients": 64,
+      "shards": 1,
+      "steadyWfs": [
+        330.8,
+        319.4
+      ],
+      "medianSteadyWfs": 325.1,
+      "p50Ms": 168,
+      "p99Ms": 544,
+      "allProcessesCpuCores": 5.77,
+      "meanBatch": 1.8
+    },
+    {
+      "activityMs": 0,
+      "processes": 2,
+      "workers": 8,
+      "clients": 64,
+      "shards": 1,
+      "steadyWfs": [
+        213.4,
+        260.1
+      ],
+      "medianSteadyWfs": 236.7,
+      "p50Ms": 238,
+      "p99Ms": 742,
+      "allProcessesCpuCores": 6.54,
+      "meanBatch": 1.93
+    },
+    {
+      "activityMs": 0,
+      "processes": 4,
+      "workers": 16,
+      "clients": 64,
+      "shards": 1,
+      "steadyWfs": [
+        262.9,
+        271.3
+      ],
+      "medianSteadyWfs": 267.1,
+      "p50Ms": 212,
+      "p99Ms": 614,
+      "allProcessesCpuCores": 7.01,
+      "meanBatch": 2.32
+    },
+    {
+      "activityMs": 0,
+      "processes": 8,
+      "workers": 32,
+      "clients": 128,
+      "shards": 1,
+      "steadyWfs": [
+        245.6,
+        232.9
+      ],
+      "medianSteadyWfs": 239.3,
+      "p50Ms": 492,
+      "p99Ms": 1346,
+      "allProcessesCpuCores": 7.21,
+      "meanBatch": 4.6
+    }
+  ]
+}
