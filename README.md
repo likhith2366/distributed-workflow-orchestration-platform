@@ -1,12 +1,56 @@
 # Conductor
 
-**Durable workflow orchestration for retail fulfillment — Spring Boot 4 (Java 21), React + TypeScript, DynamoDB / SQS / S3 / EventBridge, AWS CDK.**
+[![Verify](https://github.com/likhith2366/distributed-workflow-orchestration-platform/actions/workflows/verify.yml/badge.svg)](https://github.com/likhith2366/distributed-workflow-orchestration-platform/actions/workflows/verify.yml)
+![Java 21](https://img.shields.io/badge/Java-21-2a78d6)
+![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1-2a78d6)
+![React 19 + TypeScript](https://img.shields.io/badge/React%2019-TypeScript-2a78d6)
+![DynamoDB · SQS · S3 · EventBridge](https://img.shields.io/badge/AWS-DynamoDB%20%C2%B7%20SQS%20%C2%B7%20S3%20%C2%B7%20EventBridge-eb6834)
+![AWS CDK](https://img.shields.io/badge/IaC-AWS%20CDK-eb6834)
 
-Conductor executes version-pinned workflow DAGs through retries, approvals, parallel branches, durable timers, and saga compensation. It is inspired by the engineering problems behind AWS Step Functions, not affiliated with Amazon.
+**A durable workflow engine: every step of every workflow is on disk before it is acknowledged, workers can die at any moment, and nothing runs twice where it matters.**
 
-The interesting demonstration is a crash between a payment-like effect and its completion acknowledgment. The task runs again; the downstream ledger recognizes the same idempotency key; a stale worker cannot overwrite the new owner's result.
+Conductor executes version-pinned workflow DAGs through retries, human approvals, parallel branches, durable timers and saga compensation. It runs either on a group-committed write-ahead log or on DynamoDB with SQS, S3 and EventBridge. It is inspired by the engineering problems behind AWS Step Functions, not affiliated with Amazon.
 
-![Console](docs/console-preview.png)
+<table>
+<tr>
+<td align="center"><h2>10,100</h2>durable workflows / second<br><sub>peak, 256 concurrent</sub></td>
+<td align="center"><h2>1.36 ms</h2>p50 workflow latency<br><sub>p99 5.7 ms, one in flight</sub></td>
+<td align="center"><h2>30 ms</h2>p99 at 8,900 workflows/s<br><sub>128 concurrent</sub></td>
+<td align="center"><h2>200 / 200</h2>process kills recovered<br><sub>0 duplicate effects</sub></td>
+</tr>
+<tr>
+<td align="center"><h2>2.75×</h2>throughput vs previous engine<br><sub>same harness, 256 workers</sub></td>
+<td align="center"><h2>−77%</h2>unloaded latency<br><sub>4.87 → 1.12 ms, 1 client, same harness</sub></td>
+<td align="center"><h2>−66%</h2>bytes written per workflow<br><sub>field-level WAL patches</sub></td>
+<td align="center"><h2>3,000</h2>random transitions replayed<br><sub>byte-identical after restart</sub></td>
+</tr>
+</table>
+
+<sub>One laptop (4-core i5, consumer NVMe), JDK 21, write-through journal, three steps per workflow with two durable effects. Headline numbers: [benchmark report](docs/benchmark.md). Before/after figures: [scaling study](docs/scaling.md). Not AWS numbers.</sub>
+
+![Conductor console: a retail fulfillment workflow waiting at fraud review after a retried payment](docs/console-light.png)
+
+<details><summary>Dark mode</summary>
+
+![Conductor console in dark mode](docs/console-dark.png)
+
+</details>
+
+## How it holds up
+
+| Concurrent workflows | Throughput | p50 | p99 |
+|---:|---:|---:|---:|
+| 1 | 574 /s | 1.36 ms | 5.7 ms |
+| 16 | 2,662 /s | 4.84 ms | 14.9 ms |
+| 64 | 6,464 /s | 7.07 ms | 29.3 ms |
+| 128 | 8,911 /s | 10.8 ms | 30.5 ms |
+| **256** | **10,116 /s** | **20.4 ms** | **50.3 ms** |
+
+![Throughput-latency curve and tail decomposition](docs/curve.png)
+
+- **The knob is concurrency.** From 32 to 128 concurrent workflows, throughput more than doubles while p99 holds at ~30 ms.
+- **The tail is understood, not guessed.** Every journal command is timed as queue wait, batch formation and durable write. At low concurrency the tail is the SSD write; from 16 up it is group-commit batching, predictable from batch size. Under open-loop load, p99 stays at ~15 ms up to 50% of capacity and the knee is between 50% and 75% ([latency vs load](docs/benchmark.md#latency-under-open-loop-load)).
+- **Crash-safe by construction.** A worker can die after charging a payment but before reporting it: the task is retried under a higher fencing token, the stale worker's late completion is rejected, and the idempotent ledger returns the original result instead of charging twice.
 
 ## Two backends, one state machine
 
@@ -72,18 +116,9 @@ LocalStack provides DynamoDB, SQS, S3 and EventBridge; nginx round-robins two st
 | Container images | Multi-stage Dockerfile; journal and LocalStack topologies smoke-tested with `docker compose` |
 | Infrastructure | CDK: DynamoDB (PITR, deletion protection), SQS + DLQ, private S3, EventBridge bus/archive/rule, internal ALB, 2 API tasks, queue-scaled workers, alarms, dashboard (assertion tests + synth) |
 
-## Performance (one laptop, not AWS)
+## Performance details
 
-| | |
-|---|---|
-| **Peak throughput** | **10,100 durable workflows/s** at 256 concurrent workflows |
-| **Latency at one concurrent workflow** | **p50 1.36 ms, p99 5.7 ms** |
-
-Conditions: JDK 21, 4-core laptop, consumer NVMe SSD, write-through journaling, three steps per workflow with two durable effects, every transition durable before acknowledgment. Both numbers come from one sweep. The full throughput-latency curve, the tail decomposition, open-loop latency under load, and why every other figure in the repo is not quoted are in **[docs/benchmark.md](docs/benchmark.md)**.
-
-![Throughput vs latency](docs/curve.png)
-
-Engineering write-ups: [scaling study](docs/scaling.md), [latency work](docs/scaling.md#latency), [durability evidence and limits](docs/durability.md), [decision log](docs/decisions.md).
+Methodology, the full curve, open-loop latency under load, GC tuning, the tail decomposition and the reasoning behind every number: **[docs/benchmark.md](docs/benchmark.md)**. How the engine got there, including measured-and-rejected ideas (journal partitioning, pipelined commit, WAL preallocation): [scaling study](docs/scaling.md) and [decision log](docs/decisions.md). Durability evidence and its limits: [docs/durability.md](docs/durability.md).
 
 > Runtime note: use JDK 21 or JDK 25.0.4+. JDK 25.0.2 has a virtual-thread timer bug (JDK-8370887) that stalled this service for seconds under load; the service logs a warning on affected builds.
 

@@ -116,7 +116,7 @@ Engine `fsync`s per workflow at 1 client: 4.85 → 4.00.
 
 Device probe first (`FsyncProbe`, 1 KiB writes, 1 thread): append + `force()` 0.63 ms; append + write-through **0.11 ms**; preallocated + write-through 0.06 ms. Preallocation would buy another ~2×, but a torn write inside zero-filled space can't be told apart from corruption of the last acknowledged frame. That would trade the journal's fail-closed check for speed, so it was not taken.
 
-Engine, interleaved, 5 reps, JDK 21, 8 workers, direct grants on in both columns (`benchmarks/latency/write-through/`):
+Engine, interleaved, 5 reps, JDK 21, 8 workers, direct grants on in both columns (this table compares sync modes at low concurrency; p50/p99 at 64, 128 and 256 concurrent are in [benchmark.md](benchmark.md#the-throughput-latency-curve)) (`benchmarks/latency/write-through/`):
 
 | Concurrent clients | p50 flush | p50 write-through | p99 flush | p99 write-through | Throughput |
 |---:|---:|---:|---:|---:|---:|
