@@ -12,4 +12,15 @@ public interface LocalEngine extends WorkflowEngine {
     long workGeneration();
     /** Blocks until a commit may have produced due work, the next timer is due, or {@code maxWaitMs} passes. */
     void awaitWork(long seenGeneration,long maxWaitMs)throws InterruptedException;
+    /**
+     * Claims due work, or waits up to {@code maxWaitMs} for some; returns null if none arrived.
+     * The default wakes on commit signals and then claims, which costs a second durable flush.
+     */
+    default Claim claimOrWait(String owner,long leaseMs,long maxWaitMs)throws IOException,InterruptedException {
+        long generation=workGeneration();
+        Claim claim=claim(owner,System.currentTimeMillis(),leaseMs);
+        if(claim!=null||maxWaitMs<=0)return claim;
+        awaitWork(generation,maxWaitMs);
+        return claim(owner,System.currentTimeMillis(),leaseMs);
+    }
 }
