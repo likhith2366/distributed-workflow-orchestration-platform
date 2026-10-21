@@ -1,34 +1,76 @@
-# Canonical benchmark
+# Benchmark report
 
-**Quote only the numbers on this page.** Every other figure in this repository was measured under different conditions (worker count, harness, journal sync mode, JDK) and exists to explain *how* the engine got here. The mapping table at the end says which is which.
-
-## Configuration
+## Two numbers
 
 | | |
 |---|---|
-| Engine | journal backend, shipped defaults: write-through WAL, batch cap 256, patch records, direct grants |
-| Process | one JVM; 256 in-process workers |
-| JVM | JDK 21.0.2, `-Xmx3g -XX:MaxGCPauseMillis=5` |
-| Workload | three-step workflow: two ledger effects (separately journaled downstream service) and an echo; instant activities; every transition and effect durable before acknowledgment |
-| Machine | laptop, Intel i5-11300H (4 cores / 8 threads), Samsung PM991a NVMe (DRAM-less, no power-loss protection), Windows 11, on AC, kept awake |
-| Method | fresh JVM per run; configurations interleaved; 3 repetitions, median reported; disk `fsync` probe before each run. Open-loop runs offer a fixed fraction of the capacity measured immediately before them, measure latency from each workflow's intended arrival time (no coordinated omission), and exclude the first 20% as warm-up |
-| Reproduce | `python scripts/latency_sweep.py --label canonical`, then `python scripts/plot_latency.py benchmarks/latency/canonical` |
+| **Peak throughput** | **10,100 durable workflows/s** at 256 concurrent workflows (p99 50 ms) |
+| **Latency at one concurrent workflow** | **p50 1.36 ms, p99 5.7 ms** |
 
-## The numbers
+**Conditions, stated once:**
+- **Runtime:** JDK 21 (`-XX:MaxGCPauseMillis=5`), one JVM.
+- **Machine:** 4-core / 8-thread laptop (i5-11300H) with a consumer NVMe SSD (Samsung PM991a, no power-loss protection), Windows 11.
+- **Engine:** write-through journal, shipped defaults.
+- **Workload:** three steps per workflow, two of them durable effects in a separately journaled ledger. Every transition and effect is durable before it is acknowledged.
+- **Method:** closed loop with workers = concurrent workflows; median of 3 runs, each in a fresh JVM, warm-up excluded. Both numbers come from the same sweep (`benchmarks/scaling/canonical-curve`).
 
-| Metric | Value |
-|---|---|
-| **Peak throughput** (closed loop, 1,024 clients) | **≈ 6,600 workflows/s** (6,651 median; runs 6,084–6,858) |
-| **Unloaded latency** (one workflow at a time) | **p50 0.98 ms, p99 4.0 ms** |
-| **Latency at 50% of capacity** (≈ 2,750 workflows/s) | **p50 1.5 ms, p99 15 ms, p99.9 38 ms** |
-| Latency at 75% of capacity | p50 2.0 ms, p99 108 ms |
-| Latency at 90% of capacity | p50 2.3 ms, p99 705 ms |
+**Every other number in this repository is for explanation, not for quoting** (see the last section).
 
-One-line version: *≈ 6,600 durable workflows/s peak on a laptop; at half that load, p99 15 ms; unloaded p50 under 1 ms.*
+## The throughput-latency curve
 
-![Latency vs load](latency.png)
+![Throughput vs latency](curve.png)
 
-| Offered load | p50 | p99 | p99.9 | p99, batch cap 64 |
+Concurrency (= workers) is the knob that moves along the curve:
+
+| Concurrent | Throughput (wf/s) | p50 | p99 | Batch size p50 / p99 |
+|---:|---:|---:|---:|---:|
+| 1 | 574 | 1.36 ms | 5.7 ms | 1 / 2 |
+| 2 | 844 | 1.64 ms | 8.3 ms | 2 / 4 |
+| 4 | 1,842 | 1.87 ms | 5.8 ms | 4 / 8 |
+| 8 | 2,501 | 2.86 ms | 8.0 ms | 6 / 16 |
+| 16 | 2,662 | 4.84 ms | 14.9 ms | 16 / 32 |
+| 32 | 3,979 | 6.01 ms | 30.4 ms | 17 / 64 |
+| 64 | 6,464 | 7.07 ms | 29.3 ms | 64 / 128 |
+| 128 | 8,911 | 10.8 ms | 30.5 ms | 128 / 256 |
+| 256 | **10,116** | 20.4 ms | **50.3 ms** | 16 / 256 |
+
+From 32 to 128 concurrent, throughput more than doubles while p99 stays at ~30 ms. Past 128, the last 14% of throughput costs a 1.7× higher p99.
+
+## What the tail is
+
+Every journal command records where its time went:
+- **queue wait:** from submission until the writer runs it, including waiting out a flush already in progress, i.e. "arrived just after a batch closed";
+- **batch formation:** until its batch starts writing;
+- **write:** the durable write itself.
+
+| Concurrent | Slowest 1% of engine commands: queue / formation / write | Formation p99, measured / predicted | Queue p99, measured / predicted |
+|---:|---|---:|---:|
+| 1 | 9% / 38% / **53%** | 0.34 / 0.09 ms | 0.09 / 0.72 ms |
+| 2 | 23% / 17% / **60%** | 0.41 / 0.16 ms | 0.40 / 1.17 ms |
+| 16 | **48% / 36%** / 16% | 3.01 / 1.02 ms | 2.59 / 2.56 ms |
+| 32 | **51% / 33%** / 16% | 3.22 / 1.56 ms | 4.01 / 3.35 ms |
+| 64 | **30% / 53%** / 17% | 4.16 / 2.29 ms | 2.66 / 3.72 ms |
+| 128 | **39% / 40%** / 20% | 8.45 / 3.66 ms | 8.57 / 4.94 ms |
+| 256 | **54% / 43%** / 4% | 12.12 / 3.64 ms | 14.04 / 4.80 ms |
+
+The predictions use only batch size and measured per-command execution cost (14–46 µs, falling as batches grow):
+- formation ≈ p99 batch size × execution cost per command;
+- queue ≈ one full batch ahead, plus one write.
+
+**What the table shows:**
+- **At 1–2 concurrent, the tail is the device write.** About 0.6–1 ms of write-time variance on the SSD.
+- **From 16 up, the tail is batching.** Queue wait plus formation is 75–96% of the slowest commands' time. Queue wait matches the batching prediction closely through 32 concurrent. Formation runs 2–3× the naive estimate at every level, because the estimate counts command execution but not encoding or OS scheduling of the writer thread. So the tail is predictable from batch size to within that factor.
+- **At 128–256, batching is inflated by pauses.** GC pauses take 4–7% of wall time at these loads (332–663 ms per run, longest 9–12 ms). A pause freezes the writer while up to 512 virtual threads keep submitting; the backlog then drains in full 256-command batches. That is why p99 batch size hits the cap and why measured queue/formation exceed the prediction by 2–3×.
+- **The batch cap is the knob for this:** formation per batch is bounded at roughly cap × per-command cost (≈ 3.6 ms at 256). The open-loop study below shows that at high load, a larger cap still gives a *lower* p99 than cap 64, because it drains a post-pause backlog in fewer batches.
+
+## Latency under open-loop load
+
+Closed loop shows latency at a given concurrency. Open loop shows what happens as *arrival rate* approaches capacity:
+- Workflows arrive at a fixed rate, and latency is measured from intended arrival time, so there is no coordinated omission.
+- Each rate is a fraction of capacity measured immediately before the run.
+- 256 workers; 3 runs; `benchmarks/latency/canonical`.
+
+| Offered load | p50 | p99 | p99.9 | p99 with batch cap 64 |
 |---:|---:|---:|---:|---:|
 | 10% | 1.02 ms | 7.2 ms | 31 ms | 8.1 ms |
 | 25% | 1.12 ms | 11.2 ms | 36 ms | 9.7 ms |
@@ -36,44 +78,31 @@ One-line version: *≈ 6,600 durable workflows/s peak on a laptop; at half that 
 | 75% | 2.03 ms | 108 ms | 178 ms | 401 ms |
 | 90% | 2.31 ms | 705 ms | 772 ms | 1,281 ms |
 
-**Operating guidance:** keep sustained load at or below ~50% of capacity for a p99 in the low tens of milliseconds. The knee is between 50% and 75%.
+**The knee is between 50% and 75% of capacity; run at or below ~50% for a p99 in the tens of milliseconds.** Pause attribution in these runs agrees with the decomposition above:
+- At 90% load, 100% of the slowest workflows overlapped a GC pause.
+- The closer load is to capacity, the less spare capacity there is to drain each pause's backlog.
 
-## Where the tail comes from
+![Latency vs load](latency.png)
 
-The p99/p50 ratio widens with load: about 7× at 10% load, 10× at 50%, 300× at 90%. The components were measured separately in every run:
+**Why the open-loop capacities (5.0–5.7k/s) are lower than the 10.1k peak.** The open-loop runs happened while the SSD was in its sustained-write state, at ~1.5–2.4 ms per write against ~0.7 ms in the curve run. Throughput on this laptop moves with that state (see [scaling](scaling.md#method)), which is why every run records a disk probe and why fractions of *just-measured* capacity are compared, not absolute rates across days.
 
-| Component (p99) | 10% load | 50% load | 90% load |
-|---|---:|---:|---:|
-| Journal durable write | 0.38 ms | 0.40 ms | 0.60 ms |
-| Batch formation (first command → batch durable) | 0.47 ms | 0.70 ms | 5.3 ms |
-| Longest GC pause in the run | 5 ms | 8 ms | 24 ms |
-| Slowest 1% overlapping a GC pause / another JVM-OS stall / neither | 22% / 36% / 44% | 76% / 0% / 14% | 100% / 0% / 0% |
+## GC tuning
 
-- **Batch formation is not the tail.** Up to 50% load, the device write and batch formation together are under ~1 ms at p99.
-- **The tail is pauses.** These are GC pauses, and stalls of up to ~50 ms where the JVM or OS stopped a spinning probe thread on this shared laptop. Slow workflows overlap them far more often than the base rate: 14–42× for GC in the attribution runs.
-- **Pauses are amplified by queueing as load rises.** A pause leaves a backlog, and the spare capacity available to drain it shrinks as utilization grows, roughly by load/(1 − load). That is why the same pauses cost ~15 ms at 50% load and hundreds of milliseconds at 90%.
-- **"Neither" at low load** is mostly workflows that started just after a stall ended and queued behind its backlog. An interval-overlap test does not catch those.
-- **GC tuning already applied:** `-XX:MaxGCPauseMillis=5` cut p99 at 2,000/s from 14–20 ms to 8–9 ms with unchanged p50 and CPU. Generational ZGC was tried and was worse here (p50 doubled).
+`-XX:MaxGCPauseMillis=5` (now the shipped JVM setting) cut p99 at 2,000/s from 14–20 ms to 8–9 ms, with equal p50 and CPU (`benchmarks/latency/gc-tuning`). Generational ZGC doubled p50 on this 4-core machine and did not improve the tail.
 
-## Does the batch cap trade tail latency for throughput?
+## Durability
 
-No.
-- **Below 50% load the caps are indistinguishable.** Median batches are 1–3 commands, far below either cap.
-- **At 75–90% load cap 256 has 2–4× lower p99** (108 vs 401 ms; 705 vs 1,281 ms). The cap only binds while a backlog drains after a pause, and a larger cap drains it in fewer flushes.
-- **Peak throughput barely moves** (6,651 vs 6,371/s, overlapping run ranges). The write-through journal makes each flush cheap enough that batches rarely fill at 256 workers.
+These are write-through numbers on a drive without power-loss protection. See [durability](durability.md):
+- **Verified:** the OS guarantee, and that the drive does real extra work for FUA writes (57–66 µs vs 4 µs cached).
+- **Not verified:** power-loss survival. This is the same trust the previous flush-based journal already placed in the drive.
 
-## Durability caveat
+## Other figures in this repository, and why they are not quoted
 
-These are write-through numbers on a drive without power-loss protection. The drive was shown to do real extra work for FUA writes (57–66 µs vs 4 µs cached), but a power-cut test was not run. See [durability](durability.md) for the evidence, the risk and the verification procedure.
-
-## Other numbers in this repository, and why they differ
-
-| Figure | Where | Conditions | Status |
+| Figure | Where | Conditions | Purpose |
 |---|---|---|---|
-| 143 wf/s | v0.1 docs | v0.1 engine, 8 workers, JDK 21, polling harness | historical |
-| 653 → 1,041 wf/s | `benchmarks/superseded-jdk25.0.2` | JDK 25.0.2 (timer bug), 8 workers | superseded |
-| 2,499 → 6,885 wf/s | [scaling](scaling.md) | before/after engine changes, 256 workers, **flush** mode, closed loop, default GC | explains the scaling work |
-| 20 → 2,666 wf/s | [scaling](scaling.md) | 10 ms simulated activities, 1 → 256 workers, flush mode | explains worker-pool scaling |
-| 4.87 → 4.24 → 1.12 ms p50 | [scaling § Latency](scaling.md#latency) | 1 client, 8 workers; direct grants, then write-through | explains the latency work |
-| +38% / +22% throughput | [scaling § Latency](scaling.md#latency) | flush vs write-through, 64 / 256 workers, closed loop | explains write-through |
-| 55 → 280 wf/s | [scaling](scaling.md) | 1–8 worker **processes** over HTTP, flush mode | explains the remote-worker protocol cost |
+| 2,499 → 6,885 wf/s | [scaling](scaling.md) | before/after engine changes, 256 workers, 1,024 clients, **flush** journal, default GC | shows where the old engine flattened |
+| 20 → 2,666 wf/s | [scaling](scaling.md) | 10 ms simulated activities, flush journal | worker-pool scaling |
+| 4.87 → 4.24 → 1.12 ms p50 | [scaling § Latency](scaling.md#latency) | 1 client, 8 workers, default GC | effect of direct grants, then write-through |
+| +38% / +22% | [scaling § Latency](scaling.md#latency) | flush vs write-through at 64 / 256 workers | effect of write-through on throughput |
+| 55 → 280 wf/s | [scaling](scaling.md) | 1–8 worker processes over HTTP, flush journal | remote-worker protocol cost |
+| 6,651 wf/s | `benchmarks/latency/canonical` | 1,024 clients, SSD in its sustained (slow) state | capacity reference for the open-loop study |
