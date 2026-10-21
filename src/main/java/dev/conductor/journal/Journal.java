@@ -104,9 +104,13 @@ public final class Journal implements AutoCloseable {
             while(b.hasRemaining())channel.write(b);
             // Write-through writes are already durable when write() returns.
             if(!WRITE_THROUGH)channel.force(true);
-            forceNanos.add(System.nanoTime()-begin);flushes.increment();records.add(recordCount);bytes.add(frames.length);
+            long spent=System.nanoTime()-begin;
+            forceNanos.add(spent);writeLatency.recordMicros(spent);flushes.increment();records.add(recordCount);bytes.add(frames.length);
         } catch(IOException e){poisoned=true;throw e;}
     }
+    /** Distribution of durable-write latency, to separate device tail from queueing tail. */
+    private final dev.conductor.core.LatencyRecorder writeLatency=new dev.conductor.core.LatencyRecorder(65_536);
+    public Map<String,Object> writeLatency(){return writeLatency.snapshot("writeMicros");}
     public Map<String,Object> stats() {
         return Map.of("flushes",flushes.sum(),"records",records.sum(),"bytes",bytes.sum(),"sync",WRITE_THROUGH?"write-through":"flush",
                 "encodeMs",encodeNanos.sum()/1_000_000,"writeAndForceMs",forceNanos.sum()/1_000_000);

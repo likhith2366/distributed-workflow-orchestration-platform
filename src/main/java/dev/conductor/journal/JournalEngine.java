@@ -151,7 +151,7 @@ public final class JournalEngine implements LocalEngine {
         long active=statuses.entrySet().stream().filter(e->!Workflow.terminal(e.getKey())).mapToLong(Map.Entry::getValue).sum();
         Map<String,Object> m=new LinkedHashMap<>();
         m.put("backend",backend());m.put("executions",executions);m.put("active",active);
-        m.put("durableTransitions",committedSequence);m.put("statuses",statuses);m.put("journal",journal.stats());m.put("writer",dispatcher.stats());
+        m.put("durableTransitions",committedSequence);m.put("statuses",statuses);m.put("journal",journal.stats());m.put("writer",dispatcher.stats());m.put("writeLatency",journal.writeLatency());
         return m;
     }
     @Override public boolean healthy(){return dispatcher.healthy();}

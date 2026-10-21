@@ -39,7 +39,8 @@ public final class JournalLedger implements EffectLedger {
     }
     @Override public long size(){return committed.get();}
     public Map<String,Object> stats() {
-        Map<String,Object> m=new LinkedHashMap<>(journal.stats());m.put("writer",dispatcher.stats());return m;
+        Map<String,Object> m=new LinkedHashMap<>(journal.stats());m.put("writer",dispatcher.stats());
+        m.put("writeLatency",journal.writeLatency());return m;
     }
     @Override public void close()throws IOException {dispatcher.close();journal.close();}
 }
