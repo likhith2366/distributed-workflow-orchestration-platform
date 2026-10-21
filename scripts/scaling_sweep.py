@@ -87,6 +87,15 @@ def row(config, activity, workers, clients, workflows, runs):
         "fsyncMsPerFlush": round(j["writeAndForceMs"] / max(1, j["flushes"]), 3),
         "transitionsPerWorkflow": round(e["durableTransitions"] / workflows, 2),
         "walBytesPerWorkflow": round(j["bytes"] / workflows),
+        "p50Micros": mid.get("steadyP50Micros", mid.get("workflowP50Micros")),
+        "p99Micros": mid.get("steadyP99Micros", mid.get("workflowP99Micros")),
+        "p50MicrosRuns": [r.get("steadyP50Micros") for r in runs],
+        "p99MicrosRuns": [r.get("steadyP99Micros") for r in runs],
+        "batchSizeP50": w.get("batchSizeP50Ms"), "batchSizeP99": w.get("batchSizeP99Ms"),
+        "executeMicrosPerCommand": round(w["executeMs"] * 1000 / max(1, w["commands"]), 1),
+        "engineCommand": w.get("commandLatency"),
+        "ledgerCommand": mid["ledgerMetrics"].get("writer", {}).get("commandLatency"),
+        "gc": mid.get("gc"),
         "diskProbeMs": [r.get("diskProbeMs") for r in runs],
     }
 
@@ -98,6 +107,8 @@ def main():
     p.add_argument("--workers", default="1,2,4,8,16,32,64,128")
     p.add_argument("--activity-ms", default="0,10")
     p.add_argument("--reps", type=int, default=3)
+    p.add_argument("--clients-per-worker", type=float, default=4, help="closed-loop clients per worker (1 = concurrency equals workers)")
+    p.add_argument("--min-clients", type=int, default=64)
     p.add_argument("--classes", default="target", help="dir with classes/ and test-classes/ (snapshot it before long sweeps)")
     args = p.parse_args()
     keep_awake()
@@ -109,7 +120,7 @@ def main():
     summary = []
     for activity in [int(a) for a in args.activity_ms.split(",")]:
         for workers in [int(w) for w in args.workers.split(",")]:
-            clients, workflows = max(64, 4 * workers), workload(activity, workers)
+            clients, workflows = max(args.min_clients, int(args.clients_per_worker * workers)), workload(activity, workers)
             runs = {name: [] for name, _ in configs}
             for rep in range(args.reps):
                 for name, flags in configs:
