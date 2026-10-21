@@ -28,7 +28,7 @@ Requires JDK 21+. The Maven wrapper downloads Maven, and the build downloads Nod
 
 ```sh
 ./mvnw package                      # builds console + jar, runs all tests (Windows: mvnw.cmd package)
-java -jar target/conductor.jar      # http://127.0.0.1:8080
+java -XX:MaxGCPauseMillis=5 -jar target/conductor.jar      # http://127.0.0.1:8080 (JDK 21, or 25.0.4+)
 ```
 
 Choose **New execution → Retail fulfillment**. Inspect the payment retry, approve the fraud-review step, and watch the two packing branches join before the timer and dispatch. Choose **Compensation demo** to reverse the inventory and payment steps after shipping fails.
@@ -72,27 +72,25 @@ LocalStack provides DynamoDB, SQS, S3 and EventBridge; nginx round-robins two st
 | Container images | Multi-stage Dockerfile; journal and LocalStack topologies smoke-tested with `docker compose` |
 | Infrastructure | CDK: DynamoDB (PITR, deletion protection), SQS + DLQ, private S3, EventBridge bus/archive/rule, internal ALB, 2 API tasks, queue-scaled workers, alarms, dashboard (assertion tests + synth) |
 
-## Scaling (local, not AWS)
+## Performance (one laptop, not AWS)
 
-Throughput vs worker count, 1 → 256 workers, every transition `fsync`ed, JDK 21, one laptop. Full method, raw data and the reasoning behind every number: **[docs/scaling.md](docs/scaling.md)**.
+**Canonical configuration**, the only numbers to quote ([docs/benchmark.md](docs/benchmark.md)): shipped defaults, 256 in-process workers, three-step workflow with two durable effects, JDK 21 with `-XX:MaxGCPauseMillis=5`, Intel i5-11300H + consumer NVMe, every transition durable before acknowledgment.
 
-![Scaling](docs/scaling.png)
+| | |
+|---|---|
+| Peak throughput | **≈ 6,600 workflows/s** |
+| Unloaded latency | **p50 0.98 ms, p99 4.0 ms** |
+| At 50% of capacity | **p50 1.5 ms, p99 15 ms, p99.9 38 ms** |
+| At 75% / 90% of capacity | p99 108 ms / 705 ms (the knee is between 50% and 75%) |
+| Crash recovery | 200 seeded process kills: 200/200 recovered, 0 duplicate effects |
 
-| | 1 worker | 16 | 64 | 128 | 256 |
-|---|---:|---:|---:|---:|---:|
-| 10 ms activities (wf/s) | 20 | 235 | 771 | 1,430 | **2,666** (51% of linear) |
-| Instant activities, current engine | 272 | 516 | 1,915† | 4,628 | **6,885** |
-| Instant activities, previous engine | 271 | 506 | 2,297† | 2,735 | 2,499 |
+![Latency vs load](docs/latency.png)
 
-† disk-latency noise; compared at equal `fsync` latency the current engine is +12% at 64 workers.
-
-- **Where it flattens, and why.** With instant activities, throughput is commands-per-`fsync` ÷ `fsync` time. The previous engine flattened at ~2.7k/s because its batch cap pinned every flush at 64 commands. Lifting the cap and writing field-level patches instead of whole executions (−66% WAL bytes) keeps it scaling to **2.75× at 256 workers**. With 10 ms activities, the engine's own cost is the commit wait, which grows from 1.2 to 6.4 ms per step as batches grow.
-- **More than one process.** A coordinator JVM plus 1–8 separate worker JVMs over HTTP scales 55 → 280 wf/s (10 ms activities) until the processes saturate the laptop's 8 hardware threads. Multi-host remains unmeasured.
-- **Rejected with data:** a partitioned journal (−11% to −53%), pipelined commit (±7%), WAL preallocation (no gain). All stay testable switches.
-- **Latency:** unloaded latency is serial durable writes, not CPU. Two changes took p50 at one client from **4.87 to 1.12 ms (−77%)** with every durability promise intact: direct grants (idle workers get work inside the commit that makes it due) and write-through journal writes (FUA writes instead of whole-cache flushes, 0.66 → 0.15 ms each). See [docs/scaling.md#latency](docs/scaling.md#latency).
-- **Crash recovery:** 200 seeded child-JVM kills, 200/200 recovered, 0 duplicate effects (`benchmarks/chaos.json`).
-
-The LocalStack HTTP run (`benchmarks/http-localstack-400.json`) is functional evidence only: the emulator serializes DynamoDB transactions.
+How it got here, and what was measured and rejected along the way:
+- [scaling study](docs/scaling.md): where throughput flattens and why, and the multi-process run.
+- [latency work](docs/scaling.md#latency): direct grants and write-through journal writes.
+- [tail analysis](docs/benchmark.md#where-the-tail-comes-from): GC and OS pauses amplified by queueing, not batch formation.
+- [durability evidence and its limits](docs/durability.md): FUA behavior measured; power-loss test procedure included but not yet run.
 
 > Runtime note: use JDK 21 or JDK 25.0.4+. JDK 25.0.2 has a virtual-thread timer bug (JDK-8370887) that stalled this service for seconds under load; the service logs a warning on affected builds.
 

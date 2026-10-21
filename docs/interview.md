@@ -4,14 +4,17 @@ Only use these bullets after you can explain, run, and modify the implementation
 
 **Distributed Workflow Orchestration Platform | Java 21, Spring Boot, React + TypeScript, DynamoDB, SQS, S3, EventBridge, AWS CDK**
 
-- Built a durable DAG workflow engine with fenced worker leases, persisted retries, timers, and approvals, and reverse-order saga compensation. One pure state machine backs two storage engines: a group-committed write-ahead log and per-execution DynamoDB transactions.
-- Ran a worker-count scaling study (1 → 256 workers, every transition `fsync`ed): found the previous engine flattened at ~2.7k workflows/s because a 64-command batch cap pinned group commit; lifting the cap and writing field-level WAL patches (−66% bytes) scaled it to **6.9k workflows/s, 2.75× at 256 workers**. Also measured and rejected journal partitioning (−11% to −53%) on the same data.
-- Cut unloaded p50 workflow latency from **4.87 to 1.12 ms (−77%)** without weakening any durability guarantee: removed a serial flush by granting work to parked workers inside the committing batch, then replaced write-then-`FlushFileBuffers` with write-through (FUA) journal writes (0.66 → 0.15 ms per durable write), verified against Microsoft's metadata-durability documentation and a 200-kill crash harness.
-- Traced a 10-second throughput collapse to a JDK 25.0.2 virtual-thread timer bug (JDK-8370887) with a 30-line reproduction, and moved benchmarks to JDK 21 with an affected-version startup warning.
-- Designed the DynamoDB backend around a **transactional outbox** to SQS and EventBridge, with S3 offload for large payloads. Verified relay recovery, concurrent-start idempotency, and worker-kill reclaim against LocalStack in CI.
-- Validated recovery across **200 seeded child-JVM kills** with **200/200 workflows completed and zero duplicate effects observed** (150 ms test lease).
+- Built a durable DAG workflow engine (Java 21, Spring Boot, React/TypeScript) with fenced worker leases, persisted retries, timers and approvals, and reverse-order saga compensation. One pure state machine backs a group-committed write-ahead log and a DynamoDB/SQS/S3/EventBridge backend with a transactional outbox.
+- Reached **≈ 6,600 durable workflows/s** on a laptop, with **p99 15 ms at 50% of capacity** and **0.98 ms p50 unloaded** (canonical config: 256 workers, every transition durable before acknowledgment). Got there by finding a batch cap that pinned group commit, writing field-level WAL patches, granting work inside the committing batch, and switching to write-through (FUA) journal writes; each change was measured A/B.
+- Measured latency open-loop up to saturation and attributed the tail to GC and OS pauses amplified by queueing, not batch formation. Tuning the G1 pause target cut p99 roughly in half at equal p50 and CPU.
+- Traced a 10-second throughput collapse to a JDK 25.0.2 virtual-thread timer bug (JDK-8370887) with a 30-line reproduction.
+- Validated recovery across **200 seeded process kills: 200/200 completed, zero duplicate effects**.
 
-Keep "local" and "LocalStack" in these claims until the CDK stack has been deployed and measured on AWS. Do not quote DynamoDB-backend throughput: none has been measured on real AWS.
+Quote only the canonical numbers ([benchmark.md](benchmark.md)), always with "on a laptop" and "durable". Keep "local" and "LocalStack" in these claims until the CDK stack has been deployed and measured on AWS. Do not quote DynamoDB-backend throughput: none has been measured on real AWS.
+
+**"Did you verify the SSD honors write-through, or trust the spec?"** Partly verified: the drive takes 57–66 µs for a FUA write against 4 µs for a cached write, so it isn't simply acking FUA from cache. Not verified: survival of power loss. That needs a power-cut test, which I wrote (`PowerLossCheck`, diskchecker-style, through the production journal) but haven't run on this laptop. Mitigations: run that test on target hardware, use PLP storage, `JOURNAL_SYNC=flush` where FUA is unreliable, or the DynamoDB backend's multi-AZ durability. Details: [durability.md](durability.md).
+
+**"What does p99 look like at peak?"** It doesn't stay bounded at peak. p99 is 15 ms at 50% of capacity, 108 ms at 75% and 705 ms at 90%. The tail is pauses (GC, OS) amplified by queueing; batch formation is under 1 ms at p99 up to 50% load. The larger batch cap *lowers* high-load p99 (it drains post-pause backlogs faster). I'd run it at or below ~50% of capacity.
 
 ## Five-minute walkthrough
 
