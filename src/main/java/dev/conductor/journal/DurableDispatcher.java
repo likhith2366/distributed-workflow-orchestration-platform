@@ -36,6 +36,8 @@ public final class DurableDispatcher implements AutoCloseable {
         final Operation<T> operation;
         final CompletableFuture<T> reply=new CompletableFuture<>();
         T result; Exception error;
+        // Latency decomposition: submitted -> executed -> its batch starts writing -> written.
+        long submitted,executed;
         Command(Operation<T> operation){this.operation=operation;}
         void execute(){try{result=operation.run();}catch(Exception e){error=e;}}
         void finish(){if(error==null)reply.complete(result);else reply.completeExceptionally(error);}
@@ -69,6 +71,48 @@ public final class DurableDispatcher implements AutoCloseable {
     // Utilisation, for explaining where throughput stops scaling.
     private volatile long batches,commands,executeNanos,flushNanos,maxSeen;
     // Batch formation: commands per batch, and time from a batch's first command to its durability.
+    private final Breakdown breakdown=new Breakdown(65_536);
+    /**
+     * Where each command's time went, in microseconds: queue wait (submitted until the writer ran it,
+     * which includes waiting out a flush already in progress), batch formation (ran until its batch
+     * started writing) and the durable write. Reported at p50/p99, and for the slowest 1% of
+     * commands as average shares, which says whether the tail is batching or something else.
+     */
+    static final class Breakdown {
+        private final long[][] samples;
+        private long count;
+        Breakdown(int capacity){samples=new long[capacity][];}
+        synchronized void record(long submitted,long executed,long writeStart,long written) {
+            samples[(int)(count++%samples.length)]=new long[]{(written-submitted)/1000,(executed-submitted)/1000,
+                    (writeStart-executed)/1000,(written-writeStart)/1000};
+        }
+        Map<String,Object> snapshot() {
+            long[][] copy;
+            synchronized(this){copy=Arrays.copyOf(samples,(int)Math.min(count,samples.length));}
+            Map<String,Object> m=new LinkedHashMap<>();
+            m.put("samples",copy.length);
+            if(copy.length==0)return m;
+            String[] names={"total","queueWait","batchFormation","write"};
+            for(int k=0;k<names.length;k++) {
+                long[] v=new long[copy.length];
+                for(int i=0;i<copy.length;i++)v[i]=copy[i][k];
+                Arrays.sort(v);
+                m.put(names[k]+"P50Micros",dev.conductor.core.LatencyRecorder.percentile(v,.50));
+                m.put(names[k]+"P99Micros",dev.conductor.core.LatencyRecorder.percentile(v,.99));
+            }
+            long[] totals=new long[copy.length];
+            for(int i=0;i<copy.length;i++)totals[i]=copy[i][0];
+            Arrays.sort(totals);
+            long threshold=dev.conductor.core.LatencyRecorder.percentile(totals,.99);
+            double q=0,f=0,w=0;int n=0;
+            for(long[] x:copy)if(x[0]>=threshold&&x[0]>0){q+=(double)x[1]/x[0];f+=(double)x[2]/x[0];w+=(double)x[3]/x[0];n++;}
+            m.put("slowest1PctCount",n);
+            m.put("slowest1PctQueueWaitShare",n==0?0:q/n);
+            m.put("slowest1PctBatchFormationShare",n==0?0:f/n);
+            m.put("slowest1PctWriteShare",n==0?0:w/n);
+            return m;
+        }
+    }
     private final dev.conductor.core.LatencyRecorder batchSizes=new dev.conductor.core.LatencyRecorder(65_536),
             batchLatency=new dev.conductor.core.LatencyRecorder(65_536);
 
@@ -92,6 +136,7 @@ public final class DurableDispatcher implements AutoCloseable {
         synchronized(this) {
             if(failed!=null)throw new IOException("Durability failure; restart required",failed);
             if(closed)throw new IOException("Dispatcher is closed");
+            command.submitted=System.nanoTime();
             queue.add(command);
         }
         // An interrupted caller must not assume its command was cancelled.
@@ -115,6 +160,7 @@ public final class DurableDispatcher implements AutoCloseable {
                 if(command==stop)break;
                 if(failed!=null){command.fail(failed);continue;}
                 long begin=System.nanoTime();
+                command.executed=begin;
                 command.execute();
                 Staged staged=log.stage();
                 executeNanos+=System.nanoTime()-begin;
@@ -162,7 +208,9 @@ public final class DurableDispatcher implements AutoCloseable {
         try {
             long begin=System.nanoTime();
             if(batch.records>0)log.force(batch.frames.toByteArray(),batch.records);
-            flushNanos+=System.nanoTime()-begin;
+            long written=System.nanoTime();
+            flushNanos+=written-begin;
+            for(Command<?> c:batch.commands)breakdown.record(c.submitted,c.executed,begin,written);
             batch.after.forEach(Runnable::run);
         } catch(Throwable t) {
             poison(t instanceof IOException io?io:new IOException("Flush failed",t));
@@ -191,6 +239,7 @@ public final class DurableDispatcher implements AutoCloseable {
         m.put("batches",b);m.put("commands",c);m.put("meanBatch",b==0?0.0:(double)c/b);m.put("maxBatch",maxSeen);
         m.put("executeMs",executeNanos/1_000_000);m.put("flushMs",flushNanos/1_000_000);
         m.putAll(batchSizes.snapshot("batchSize"));m.putAll(batchLatency.snapshot("batchOpenToDurableMicros"));
+        m.put("commandLatency",breakdown.snapshot());
         return m;
     }
     @Override public void close()throws IOException {
