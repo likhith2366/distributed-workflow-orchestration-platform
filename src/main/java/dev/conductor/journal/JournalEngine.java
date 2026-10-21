@@ -32,6 +32,11 @@ public final class JournalEngine implements LocalEngine {
     private final PriorityQueue<Due> due=new PriorityQueue<>(Comparator.comparingLong(Due::at).thenComparingLong(Due::order));
     private final Map<String,Long> indexed=new HashMap<>();
     private final List<Pending> pending=new ArrayList<>();
+    /** Workers parked in {@link #claimOrWait}; served by the writer in the batch that makes work due. */
+    private record Idle(String owner,long leaseMs,CompletableFuture<Claim> grant) {}
+    private final ArrayDeque<Idle> idle=new ArrayDeque<>();
+    /** {@code -Dconductor.directGrant=false}: wake-then-claim instead (one more flush per idle claim), for A/B. */
+    private static final boolean DIRECT_GRANT=!"false".equals(System.getProperty("conductor.directGrant"));
     private long sequence,dueOrder;
 
     // Committed, concurrently readable state.
@@ -165,6 +170,7 @@ public final class JournalEngine implements LocalEngine {
      * time they imply. Readers and claimers see neither until the flusher has made them durable.
      */
     private DurableDispatcher.Staged stageCommand()throws IOException {
+        List<Map.Entry<CompletableFuture<Claim>,Claim>> grants=grantToIdle();
         List<Pending> staged=pending.isEmpty()?List.of():new ArrayList<>(pending);
         pending.clear();
         byte[] frames=new byte[0];
@@ -177,8 +183,55 @@ public final class JournalEngine implements LocalEngine {
         return new DurableDispatcher.Staged(frames,staged.size(),()->{
             for(Pending p:staged)publish(p.run(),p.sequence());
             nextDue=dueSnapshot;
+            for(var g:grants)g.getKey().complete(g.getValue());
             signalWork();
         });
+    }
+    /**
+     * Executor thread: hands due tasks to parked workers inside the current batch, so the claim is
+     * made durable by the same fsync as the transition that made the task due, instead of the worker
+     * waking afterwards and spending a flush of its own. Grants are released only after that flush.
+     */
+    private List<Map.Entry<CompletableFuture<Claim>,Claim>> grantToIdle() {
+        if(idle.isEmpty())return List.of();
+        List<Map.Entry<CompletableFuture<Claim>,Claim>> grants=new ArrayList<>();
+        long now=System.currentTimeMillis();
+        while(!idle.isEmpty()&&!due.isEmpty()&&due.peek().at()<=now) {
+            Idle waiter=idle.peek();
+            if(waiter.grant().isDone()){idle.poll();continue;}
+            Claim claim=doClaim(waiter.owner(),now,waiter.leaseMs());
+            if(claim==null)break;
+            idle.poll();grants.add(Map.entry(waiter.grant(),claim));
+        }
+        return grants;
+    }
+    @Override public Claim claimOrWait(String owner,long leaseMs,long maxWaitMs)throws IOException,InterruptedException {
+        if(!DIRECT_GRANT)return LocalEngine.super.claimOrWait(owner,leaseMs,maxWaitMs);
+        if(owner==null||owner.isBlank()||leaseMs<1)throw new IllegalArgumentException("Invalid lease");
+        Idle waiter=new Idle(owner,leaseMs,new CompletableFuture<>());
+        Claim immediate=dispatcher.call(()->{
+            Claim claim=doClaim(owner,System.currentTimeMillis(),leaseMs);
+            if(claim==null&&maxWaitMs>0)idle.add(waiter);
+            return claim;
+        });
+        if(immediate!=null||maxWaitMs<=0)return immediate;
+        // Timers fall due without any command running; never sleep past the next due time.
+        long wait=Math.max(1,Math.min(maxWaitMs,nextDue-System.currentTimeMillis()));
+        try{return waiter.grant().get(wait,TimeUnit.MILLISECONDS);}
+        catch(TimeoutException e) {
+            // Withdraw. If the writer granted meanwhile, the grant is durable or about to be: use it.
+            boolean withdrawn=dispatcher.call(()->idle.remove(waiter));
+            if(withdrawn)return claim(owner,System.currentTimeMillis(),leaseMs);
+            while(true) {
+                try{return waiter.grant().get(1,TimeUnit.SECONDS);}
+                catch(ExecutionException ex){throw new IOException(ex.getCause());}
+                catch(TimeoutException stillFlushing) {
+                    // A failed flush never releases its grants; do not wait for one forever.
+                    if(!healthy())throw new IOException("Durability failure; restart required");
+                }
+            }
+        }
+        catch(ExecutionException e){throw new IOException(e.getCause());}
     }
     private Map<String,Object> writerCopy(String id) {
         Map<String,Object> run=runs.get(id);
