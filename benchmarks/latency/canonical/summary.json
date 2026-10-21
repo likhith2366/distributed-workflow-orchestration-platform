@@ -1,0 +1,454 @@
+{
+  "label": "canonical",
+  "workers": 256,
+  "jvm": [
+    "-Xmx3g",
+    "-XX:MaxGCPauseMillis=5"
+  ],
+  "configs": {
+    "default": [],
+    "cap64": [
+      "-Dconductor.batchSize=64"
+    ]
+  },
+  "peak": {
+    "default": {
+      "median": 6651,
+      "runs": [
+        6651,
+        6084,
+        6858
+      ]
+    },
+    "cap64": {
+      "median": 6371,
+      "runs": [
+        6115,
+        6371,
+        6775
+      ]
+    }
+  },
+  "unloaded": {
+    "default": {
+      "p50Ms": 0.98,
+      "p99Ms": 4.03
+    },
+    "cap64": {
+      "p50Ms": 0.98,
+      "p99Ms": 4.02
+    }
+  },
+  "openLoop": [
+    {
+      "config": "default",
+      "fractionOfCapacity": 0.1,
+      "capacityJustBefore": [
+        4919,
+        5649,
+        5702
+      ],
+      "offered": [
+        492,
+        565,
+        570
+      ],
+      "achieved": [
+        492,
+        565,
+        570
+      ],
+      "p50Ms": 1.02,
+      "p99Ms": 7.21,
+      "p999Ms": 30.57,
+      "p99Runs": [
+        7.21,
+        10.31,
+        5.76
+      ],
+      "batchP50": 1,
+      "batchP99": 236,
+      "writeP99Ms": 0.38,
+      "batchOpenToDurableP99Ms": 0.467,
+      "dispatchP99Ms": 14,
+      "tailGc": 0.22,
+      "tailStall": 0.36,
+      "tailNeither": 0.44,
+      "gcMaxPauseMs": 5,
+      "diskProbeMs": [
+        0.659,
+        0.629,
+        0.657
+      ]
+    },
+    {
+      "config": "cap64",
+      "fractionOfCapacity": 0.1,
+      "capacityJustBefore": [
+        5103,
+        5431,
+        5467
+      ],
+      "offered": [
+        510,
+        543,
+        547
+      ],
+      "achieved": [
+        510,
+        543,
+        547
+      ],
+      "p50Ms": 1.01,
+      "p99Ms": 8.12,
+      "p999Ms": 27.47,
+      "p99Runs": [
+        8.12,
+        7.75,
+        17.93
+      ],
+      "batchP50": 1,
+      "batchP99": 64,
+      "writeP99Ms": 0.364,
+      "batchOpenToDurableP99Ms": 0.366,
+      "dispatchP99Ms": 22,
+      "tailGc": 0.29,
+      "tailStall": 0.29,
+      "tailNeither": 0.4,
+      "gcMaxPauseMs": 5,
+      "diskProbeMs": [
+        0.699,
+        0.644,
+        0.665
+      ]
+    },
+    {
+      "config": "default",
+      "fractionOfCapacity": 0.25,
+      "capacityJustBefore": [
+        5707,
+        5626,
+        5408
+      ],
+      "offered": [
+        1427,
+        1407,
+        1352
+      ],
+      "achieved": [
+        1427,
+        1407,
+        1352
+      ],
+      "p50Ms": 1.12,
+      "p99Ms": 11.19,
+      "p999Ms": 35.74,
+      "p99Runs": [
+        10.24,
+        11.19,
+        13.17
+      ],
+      "batchP50": 1,
+      "batchP99": 159,
+      "writeP99Ms": 0.342,
+      "batchOpenToDurableP99Ms": 0.357,
+      "dispatchP99Ms": 147,
+      "tailGc": 0.19,
+      "tailStall": 0.56,
+      "tailNeither": 0.29,
+      "gcMaxPauseMs": 6,
+      "diskProbeMs": [
+        0.643,
+        0.665,
+        0.656
+      ]
+    },
+    {
+      "config": "cap64",
+      "fractionOfCapacity": 0.25,
+      "capacityJustBefore": [
+        5415,
+        5172,
+        4716
+      ],
+      "offered": [
+        1354,
+        1293,
+        1179
+      ],
+      "achieved": [
+        1354,
+        1293,
+        1179
+      ],
+      "p50Ms": 1.02,
+      "p99Ms": 9.68,
+      "p999Ms": 38.21,
+      "p99Runs": [
+        9.68,
+        9.4,
+        10.41
+      ],
+      "batchP50": 1,
+      "batchP99": 64,
+      "writeP99Ms": 0.362,
+      "batchOpenToDurableP99Ms": 0.34,
+      "dispatchP99Ms": 59,
+      "tailGc": 0.38,
+      "tailStall": 0.43,
+      "tailNeither": 0.11,
+      "gcMaxPauseMs": 6,
+      "diskProbeMs": [
+        0.671,
+        0.664,
+        0.73
+      ]
+    },
+    {
+      "config": "default",
+      "fractionOfCapacity": 0.5,
+      "capacityJustBefore": [
+        5471,
+        5676,
+        5394
+      ],
+      "offered": [
+        2735,
+        2838,
+        2697
+      ],
+      "achieved": [
+        2733,
+        2838,
+        2697
+      ],
+      "p50Ms": 1.53,
+      "p99Ms": 14.99,
+      "p999Ms": 37.6,
+      "p99Runs": [
+        14.99,
+        20.86,
+        10.35
+      ],
+      "batchP50": 3,
+      "batchP99": 240,
+      "writeP99Ms": 0.397,
+      "batchOpenToDurableP99Ms": 0.704,
+      "dispatchP99Ms": 2,
+      "tailGc": 0.76,
+      "tailStall": 0.0,
+      "tailNeither": 0.14,
+      "gcMaxPauseMs": 8,
+      "diskProbeMs": [
+        0.661,
+        1.511,
+        1.425
+      ]
+    },
+    {
+      "config": "cap64",
+      "fractionOfCapacity": 0.5,
+      "capacityJustBefore": [
+        4920,
+        5363,
+        5520
+      ],
+      "offered": [
+        2460,
+        2682,
+        2760
+      ],
+      "achieved": [
+        2460,
+        2682,
+        2760
+      ],
+      "p50Ms": 1.6,
+      "p99Ms": 14.53,
+      "p999Ms": 37.31,
+      "p99Runs": [
+        36.66,
+        13.55,
+        14.53
+      ],
+      "batchP50": 3,
+      "batchP99": 64,
+      "writeP99Ms": 0.407,
+      "batchOpenToDurableP99Ms": 0.808,
+      "dispatchP99Ms": 2,
+      "tailGc": 0.35,
+      "tailStall": 0.37,
+      "tailNeither": 0.06,
+      "gcMaxPauseMs": 9,
+      "diskProbeMs": [
+        5.714,
+        1.486,
+        1.495
+      ]
+    },
+    {
+      "config": "default",
+      "fractionOfCapacity": 0.75,
+      "capacityJustBefore": [
+        5063,
+        5303,
+        5075
+      ],
+      "offered": [
+        3798,
+        3977,
+        3806
+      ],
+      "achieved": [
+        3797,
+        3976,
+        3805
+      ],
+      "p50Ms": 2.03,
+      "p99Ms": 107.88,
+      "p999Ms": 178.02,
+      "p99Runs": [
+        107.88,
+        38.79,
+        182.26
+      ],
+      "batchP50": 5,
+      "batchP99": 253,
+      "writeP99Ms": 0.508,
+      "batchOpenToDurableP99Ms": 1.622,
+      "dispatchP99Ms": 5,
+      "tailGc": 0.9,
+      "tailStall": 0.0,
+      "tailNeither": 0.1,
+      "gcMaxPauseMs": 14,
+      "diskProbeMs": [
+        1.416,
+        1.517,
+        1.553
+      ]
+    },
+    {
+      "config": "cap64",
+      "fractionOfCapacity": 0.75,
+      "capacityJustBefore": [
+        5595,
+        5115,
+        5068
+      ],
+      "offered": [
+        4196,
+        3836,
+        3801
+      ],
+      "achieved": [
+        4195,
+        3834,
+        3800
+      ],
+      "p50Ms": 2.07,
+      "p99Ms": 401.25,
+      "p999Ms": 435.61,
+      "p99Runs": [
+        620.95,
+        228.62,
+        401.25
+      ],
+      "batchP50": 5,
+      "batchP99": 64,
+      "writeP99Ms": 0.493,
+      "batchOpenToDurableP99Ms": 2.876,
+      "dispatchP99Ms": 3,
+      "tailGc": 1.0,
+      "tailStall": 0.0,
+      "tailNeither": 0.0,
+      "gcMaxPauseMs": 13,
+      "diskProbeMs": [
+        1.493,
+        0.688,
+        2.008
+      ]
+    },
+    {
+      "config": "default",
+      "fractionOfCapacity": 0.9,
+      "capacityJustBefore": [
+        5556,
+        5497,
+        4472
+      ],
+      "offered": [
+        5001,
+        4947,
+        4025
+      ],
+      "achieved": [
+        5000,
+        4946,
+        4024
+      ],
+      "p50Ms": 2.31,
+      "p99Ms": 705.41,
+      "p999Ms": 772.18,
+      "p99Runs": [
+        2032.93,
+        705.41,
+        153.22
+      ],
+      "batchP50": 7,
+      "batchP99": 256,
+      "writeP99Ms": 0.598,
+      "batchOpenToDurableP99Ms": 5.296,
+      "dispatchP99Ms": 6,
+      "tailGc": 1.0,
+      "tailStall": 0.0,
+      "tailNeither": 0.0,
+      "gcMaxPauseMs": 24,
+      "diskProbeMs": [
+        1.976,
+        1.961,
+        2.217
+      ]
+    },
+    {
+      "config": "cap64",
+      "fractionOfCapacity": 0.9,
+      "capacityJustBefore": [
+        5309,
+        5589,
+        5139
+      ],
+      "offered": [
+        4778,
+        5031,
+        4625
+      ],
+      "achieved": [
+        4766,
+        5011,
+        4624
+      ],
+      "p50Ms": 2.99,
+      "p99Ms": 1280.63,
+      "p999Ms": 1338.76,
+      "p99Runs": [
+        1280.63,
+        1453.83,
+        998.44
+      ],
+      "batchP50": 8,
+      "batchP99": 64,
+      "writeP99Ms": 0.591,
+      "batchOpenToDurableP99Ms": 3.54,
+      "dispatchP99Ms": 31,
+      "tailGc": 1.0,
+      "tailStall": 0.0,
+      "tailNeither": 0.0,
+      "gcMaxPauseMs": 17,
+      "diskProbeMs": [
+        1.253,
+        1.416,
+        6.41
+      ]
+    }
+  ]
+}
