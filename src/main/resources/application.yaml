@@ -1,0 +1,57 @@
+# Environment variables keep the names used by the scripts, compose files and CDK stack.
+spring:
+  application:
+    name: conductor
+  threads:
+    virtual:
+      enabled: true
+  main:
+    banner-mode: off
+  web:
+    resources:
+      # The React build is served from classpath:/static; there is no template engine.
+      add-mappings: true
+
+server:
+  port: ${PORT:8080}
+  address: ${BIND_ADDRESS:127.0.0.1}
+  shutdown: graceful
+  error:
+    whitelabel:
+      enabled: false
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,text/javascript,application/javascript
+    min-response-size: 2048
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+conductor:
+  store: ${CONDUCTOR_STORE:journal}
+  role: ${CONDUCTOR_ROLE:coordinator}
+  data-dir: ${DATA_DIR:data}
+  workers: ${WORKERS:8}
+  lease-ms: ${LEASE_MS:3000}
+  api-token: ${API_TOKEN:}
+  coordinator-url: ${COORDINATOR_URL:http://127.0.0.1:8080}
+  max-concurrent-requests: 256
+  relay-interval-ms: 500
+  # Independent WAL + writer per shard; fixed for the life of a data directory.
+  journal-shards: ${JOURNAL_SHARDS:1}
+  aws:
+    region: ${AWS_REGION:us-east-1}
+    endpoint: ${CONDUCTOR_AWS_ENDPOINT:}
+    table: ${CONDUCTOR_TABLE:conductor}
+    queue: ${CONDUCTOR_QUEUE:conductor-tasks}
+    bucket: ${CONDUCTOR_BUCKET:conductor-payloads}
+    event-bus: ${CONDUCTOR_EVENT_BUS:conductor}
+    create-resources: ${CONDUCTOR_CREATE_RESOURCES:false}
+    payload-threshold-bytes: ${CONDUCTOR_PAYLOAD_THRESHOLD_BYTES:32768}
