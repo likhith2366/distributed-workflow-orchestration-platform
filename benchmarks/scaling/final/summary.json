@@ -1,0 +1,1017 @@
+{
+  "label": "final",
+  "configs": {
+    "before": "-Dconductor.batchSize=64 -Dconductor.deepCopyTransitions=true -Dconductor.fullProjectionRecords=true",
+    "after": ""
+  },
+  "points": [
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 1,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        254.5,
+        270.6,
+        275.3
+      ],
+      "medianSteadyWfs": 270.6,
+      "p50Ms": 231,
+      "p99Ms": 331,
+      "cpuCores": 0.49,
+      "meanBatch": 1.32,
+      "maxBatch": 64,
+      "flushShare": 0.537,
+      "executeShare": 0.05,
+      "fsyncMsPerFlush": 0.661,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8107,
+      "diskProbeMs": [
+        0.657,
+        0.654,
+        0.623
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 1,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        268.7,
+        271.5,
+        279.9
+      ],
+      "medianSteadyWfs": 271.5,
+      "p50Ms": 228,
+      "p99Ms": 321,
+      "cpuCores": 0.57,
+      "meanBatch": 1.32,
+      "maxBatch": 64,
+      "flushShare": 0.538,
+      "executeShare": 0.043,
+      "fsyncMsPerFlush": 0.662,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2713,
+      "diskProbeMs": [
+        0.681,
+        0.684,
+        0.617
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 2,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        385.9,
+        381.8,
+        63.7
+      ],
+      "medianSteadyWfs": 381.8,
+      "p50Ms": 173,
+      "p99Ms": 278,
+      "cpuCores": 0.61,
+      "meanBatch": 1.73,
+      "maxBatch": 64,
+      "flushShare": 0.795,
+      "executeShare": 0.063,
+      "fsyncMsPerFlush": 0.911,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8107,
+      "diskProbeMs": [
+        0.629,
+        0.64,
+        1.499
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 2,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        376.4,
+        166.6,
+        109.5
+      ],
+      "medianSteadyWfs": 166.6,
+      "p50Ms": 391,
+      "p99Ms": 472,
+      "cpuCores": 0.41,
+      "meanBatch": 1.78,
+      "maxBatch": 64,
+      "flushShare": 0.781,
+      "executeShare": 0.033,
+      "fsyncMsPerFlush": 2.076,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2721,
+      "diskProbeMs": [
+        0.629,
+        0.835,
+        2.347
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 4,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        117.3,
+        157.5,
+        126.1
+      ],
+      "medianSteadyWfs": 126.1,
+      "p50Ms": 362,
+      "p99Ms": 4903,
+      "cpuCores": 0.26,
+      "meanBatch": 2.65,
+      "maxBatch": 64,
+      "flushShare": 0.927,
+      "executeShare": 0.029,
+      "fsyncMsPerFlush": 4.687,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8107,
+      "diskProbeMs": [
+        2.315,
+        2.404,
+        2.532
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 4,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        124.3,
+        159.1,
+        144.6
+      ],
+      "medianSteadyWfs": 144.6,
+      "p50Ms": 418,
+      "p99Ms": 806,
+      "cpuCores": 0.37,
+      "meanBatch": 2.46,
+      "maxBatch": 64,
+      "flushShare": 0.923,
+      "executeShare": 0.03,
+      "fsyncMsPerFlush": 3.849,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2721,
+      "diskProbeMs": [
+        1.923,
+        2.762,
+        2.237
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 8,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        245.9,
+        271.8,
+        265.7
+      ],
+      "medianSteadyWfs": 265.7,
+      "p50Ms": 225,
+      "p99Ms": 402,
+      "cpuCores": 0.45,
+      "meanBatch": 4.97,
+      "maxBatch": 64,
+      "flushShare": 0.91,
+      "executeShare": 0.051,
+      "fsyncMsPerFlush": 4.137,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8107,
+      "diskProbeMs": [
+        2.387,
+        2.294,
+        2.618
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 8,
+      "clients": 64,
+      "workflows": 3000,
+      "steadyWfs": [
+        296.7,
+        295.7,
+        274.7
+      ],
+      "medianSteadyWfs": 295.7,
+      "p50Ms": 219,
+      "p99Ms": 272,
+      "cpuCores": 0.45,
+      "meanBatch": 5.07,
+      "maxBatch": 64,
+      "flushShare": 0.895,
+      "executeShare": 0.048,
+      "fsyncMsPerFlush": 3.827,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2721,
+      "diskProbeMs": [
+        2.398,
+        2.907,
+        2.415
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 16,
+      "clients": 64,
+      "workflows": 4000,
+      "steadyWfs": [
+        506.0,
+        487.0,
+        686.4
+      ],
+      "medianSteadyWfs": 506.0,
+      "p50Ms": 117,
+      "p99Ms": 247,
+      "cpuCores": 0.64,
+      "meanBatch": 9.74,
+      "maxBatch": 64,
+      "flushShare": 0.894,
+      "executeShare": 0.074,
+      "fsyncMsPerFlush": 4.259,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8114,
+      "diskProbeMs": [
+        2.331,
+        2.247,
+        1.887
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 16,
+      "clients": 64,
+      "workflows": 4000,
+      "steadyWfs": [
+        515.7,
+        584.8,
+        507.1
+      ],
+      "medianSteadyWfs": 515.7,
+      "p50Ms": 111,
+      "p99Ms": 270,
+      "cpuCores": 0.63,
+      "meanBatch": 9.61,
+      "maxBatch": 64,
+      "flushShare": 0.897,
+      "executeShare": 0.062,
+      "fsyncMsPerFlush": 4.1,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2724,
+      "diskProbeMs": [
+        2.358,
+        2.193,
+        1.996
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 32,
+      "clients": 128,
+      "workflows": 8000,
+      "steadyWfs": [
+        1125.7,
+        976.1,
+        1121.4
+      ],
+      "medianSteadyWfs": 1121.4,
+      "p50Ms": 101,
+      "p99Ms": 333,
+      "cpuCores": 0.93,
+      "meanBatch": 23.54,
+      "maxBatch": 64,
+      "flushShare": 0.778,
+      "executeShare": 0.147,
+      "fsyncMsPerFlush": 4.069,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8122,
+      "diskProbeMs": [
+        2.288,
+        2.66,
+        2.353
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 32,
+      "clients": 128,
+      "workflows": 8000,
+      "steadyWfs": [
+        1005.2,
+        1211.7,
+        1177.9
+      ],
+      "medianSteadyWfs": 1177.9,
+      "p50Ms": 106,
+      "p99Ms": 265,
+      "cpuCores": 1.08,
+      "meanBatch": 20.01,
+      "maxBatch": 128,
+      "flushShare": 0.845,
+      "executeShare": 0.112,
+      "fsyncMsPerFlush": 3.673,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2727,
+      "diskProbeMs": [
+        2.208,
+        2.488,
+        2.169
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 64,
+      "clients": 256,
+      "workflows": 16000,
+      "steadyWfs": [
+        2297.2,
+        2598.9,
+        2163.3
+      ],
+      "medianSteadyWfs": 2297.2,
+      "p50Ms": 106,
+      "p99Ms": 273,
+      "cpuCores": 1.16,
+      "meanBatch": 44.93,
+      "maxBatch": 64,
+      "flushShare": 0.7,
+      "executeShare": 0.232,
+      "fsyncMsPerFlush": 3.475,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8130,
+      "diskProbeMs": [
+        2.037,
+        1.98,
+        2.336
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 64,
+      "clients": 256,
+      "workflows": 16000,
+      "steadyWfs": [
+        2585.4,
+        1915.1,
+        1754.5
+      ],
+      "medianSteadyWfs": 1915.1,
+      "p50Ms": 113,
+      "p99Ms": 257,
+      "cpuCores": 1.04,
+      "meanBatch": 41.83,
+      "maxBatch": 256,
+      "flushShare": 0.798,
+      "executeShare": 0.15,
+      "fsyncMsPerFlush": 4.32,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2730,
+      "diskProbeMs": [
+        1.916,
+        2.02,
+        2.227
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 128,
+      "clients": 512,
+      "workflows": 32000,
+      "steadyWfs": [
+        2734.9,
+        2686.4,
+        2813.6
+      ],
+      "medianSteadyWfs": 2734.9,
+      "p50Ms": 172,
+      "p99Ms": 393,
+      "cpuCores": 1.35,
+      "meanBatch": 63.48,
+      "maxBatch": 64,
+      "flushShare": 0.67,
+      "executeShare": 0.263,
+      "fsyncMsPerFlush": 4.122,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8144,
+      "diskProbeMs": [
+        2.257,
+        1.938,
+        1.656
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 128,
+      "clients": 512,
+      "workflows": 32000,
+      "steadyWfs": [
+        3352.8,
+        4628.4,
+        6252.2
+      ],
+      "medianSteadyWfs": 4628.4,
+      "p50Ms": 112,
+      "p99Ms": 301,
+      "cpuCores": 1.79,
+      "meanBatch": 90.19,
+      "maxBatch": 256,
+      "flushShare": 0.611,
+      "executeShare": 0.296,
+      "fsyncMsPerFlush": 3.175,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2736,
+      "diskProbeMs": [
+        2.387,
+        2.32,
+        1.992
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 0,
+      "workers": 256,
+      "clients": 1024,
+      "workflows": 64000,
+      "steadyWfs": [
+        2498.9,
+        2112.0,
+        2897.8
+      ],
+      "medianSteadyWfs": 2498.9,
+      "p50Ms": 347,
+      "p99Ms": 1196,
+      "cpuCores": 1.35,
+      "meanBatch": 63.82,
+      "maxBatch": 64,
+      "flushShare": 0.647,
+      "executeShare": 0.287,
+      "fsyncMsPerFlush": 3.959,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8155,
+      "diskProbeMs": [
+        0.664,
+        2.375,
+        100.0
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 0,
+      "workers": 256,
+      "clients": 1024,
+      "workflows": 64000,
+      "steadyWfs": [
+        6884.9,
+        7108.2,
+        6724.9
+      ],
+      "medianSteadyWfs": 6884.9,
+      "p50Ms": 146,
+      "p99Ms": 497,
+      "cpuCores": 2.17,
+      "meanBatch": 181.05,
+      "maxBatch": 256,
+      "flushShare": 0.467,
+      "executeShare": 0.41,
+      "fsyncMsPerFlush": 3.255,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2740,
+      "diskProbeMs": [
+        2.304,
+        2.198,
+        2.132
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 1,
+      "clients": 64,
+      "workflows": 400,
+      "steadyWfs": [
+        20.8,
+        19.7,
+        18.3
+      ],
+      "medianSteadyWfs": 19.7,
+      "p50Ms": 3225,
+      "p99Ms": 3618,
+      "cpuCores": 0.1,
+      "meanBatch": 1.04,
+      "maxBatch": 64,
+      "flushShare": 0.152,
+      "executeShare": 0.011,
+      "fsyncMsPerFlush": 2.04,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8717,
+      "diskProbeMs": [
+        2.193,
+        1.916,
+        2.079
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 1,
+      "clients": 64,
+      "workflows": 400,
+      "steadyWfs": [
+        20.9,
+        20.3,
+        18.4
+      ],
+      "medianSteadyWfs": 20.3,
+      "p50Ms": 3099,
+      "p99Ms": 3363,
+      "cpuCores": 0.11,
+      "meanBatch": 1.04,
+      "maxBatch": 64,
+      "flushShare": 0.142,
+      "executeShare": 0.011,
+      "fsyncMsPerFlush": 1.859,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2802,
+      "diskProbeMs": [
+        10.989,
+        1.425,
+        4.975
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 2,
+      "clients": 64,
+      "workflows": 600,
+      "steadyWfs": [
+        36.9,
+        37.5,
+        38.0
+      ],
+      "medianSteadyWfs": 37.5,
+      "p50Ms": 1650,
+      "p99Ms": 1868,
+      "cpuCores": 0.15,
+      "meanBatch": 2.05,
+      "maxBatch": 64,
+      "flushShare": 0.142,
+      "executeShare": 0.014,
+      "fsyncMsPerFlush": 1.881,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8720,
+      "diskProbeMs": [
+        2.155,
+        1.42,
+        1.445
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 2,
+      "clients": 64,
+      "workflows": 600,
+      "steadyWfs": [
+        39.0,
+        37.0,
+        40.0
+      ],
+      "medianSteadyWfs": 39.0,
+      "p50Ms": 1557,
+      "p99Ms": 1744,
+      "cpuCores": 0.18,
+      "meanBatch": 2.02,
+      "maxBatch": 64,
+      "flushShare": 0.136,
+      "executeShare": 0.014,
+      "fsyncMsPerFlush": 1.702,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2803,
+      "diskProbeMs": [
+        1.497,
+        1.57,
+        0.624
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 4,
+      "clients": 64,
+      "workflows": 1200,
+      "steadyWfs": [
+        71.0,
+        67.3,
+        76.3
+      ],
+      "medianSteadyWfs": 71.0,
+      "p50Ms": 902,
+      "p99Ms": 1098,
+      "cpuCores": 0.12,
+      "meanBatch": 3.87,
+      "maxBatch": 64,
+      "flushShare": 0.17,
+      "executeShare": 0.017,
+      "fsyncMsPerFlush": 2.37,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8724,
+      "diskProbeMs": [
+        1.553,
+        2.273,
+        1.996
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 4,
+      "clients": 64,
+      "workflows": 1200,
+      "steadyWfs": [
+        69.3,
+        69.2,
+        77.9
+      ],
+      "medianSteadyWfs": 69.3,
+      "p50Ms": 914,
+      "p99Ms": 1104,
+      "cpuCores": 0.2,
+      "meanBatch": 3.44,
+      "maxBatch": 64,
+      "flushShare": 0.192,
+      "executeShare": 0.015,
+      "fsyncMsPerFlush": 2.422,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2805,
+      "diskProbeMs": [
+        2.008,
+        1.946,
+        0.687
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 8,
+      "clients": 64,
+      "workflows": 2400,
+      "steadyWfs": [
+        122.9,
+        116.7,
+        121.5
+      ],
+      "medianSteadyWfs": 121.5,
+      "p50Ms": 515,
+      "p99Ms": 766,
+      "cpuCores": 0.22,
+      "meanBatch": 5.63,
+      "maxBatch": 64,
+      "flushShare": 0.237,
+      "executeShare": 0.023,
+      "fsyncMsPerFlush": 2.768,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8734,
+      "diskProbeMs": [
+        1.57,
+        2.188,
+        2.16
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 8,
+      "clients": 64,
+      "workflows": 2400,
+      "steadyWfs": [
+        133.5,
+        125.7,
+        140.4
+      ],
+      "medianSteadyWfs": 133.5,
+      "p50Ms": 470,
+      "p99Ms": 555,
+      "cpuCores": 0.24,
+      "meanBatch": 6.63,
+      "maxBatch": 64,
+      "flushShare": 0.192,
+      "executeShare": 0.019,
+      "fsyncMsPerFlush": 2.393,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2810,
+      "diskProbeMs": [
+        1.957,
+        4.975,
+        1.439
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 16,
+      "clients": 64,
+      "workflows": 4800,
+      "steadyWfs": [
+        204.9,
+        220.9,
+        216.2
+      ],
+      "medianSteadyWfs": 216.2,
+      "p50Ms": 296,
+      "p99Ms": 452,
+      "cpuCores": 0.23,
+      "meanBatch": 7.58,
+      "maxBatch": 64,
+      "flushShare": 0.347,
+      "executeShare": 0.033,
+      "fsyncMsPerFlush": 3.154,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8746,
+      "diskProbeMs": [
+        2.237,
+        2.227,
+        2.242
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 16,
+      "clients": 64,
+      "workflows": 4800,
+      "steadyWfs": [
+        221.8,
+        234.9,
+        253.3
+      ],
+      "medianSteadyWfs": 234.9,
+      "p50Ms": 279,
+      "p99Ms": 386,
+      "cpuCores": 0.26,
+      "meanBatch": 7.76,
+      "maxBatch": 64,
+      "flushShare": 0.325,
+      "executeShare": 0.027,
+      "fsyncMsPerFlush": 2.715,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2815,
+      "diskProbeMs": [
+        3.717,
+        1.931,
+        3.922
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 32,
+      "clients": 128,
+      "workflows": 9600,
+      "steadyWfs": [
+        432.2,
+        397.4,
+        346.2
+      ],
+      "medianSteadyWfs": 397.4,
+      "p50Ms": 323,
+      "p99Ms": 448,
+      "cpuCores": 0.32,
+      "meanBatch": 14.38,
+      "maxBatch": 64,
+      "flushShare": 0.359,
+      "executeShare": 0.05,
+      "fsyncMsPerFlush": 3.281,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8753,
+      "diskProbeMs": [
+        3.559,
+        3.559,
+        2.32
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 32,
+      "clients": 128,
+      "workflows": 9600,
+      "steadyWfs": [
+        385.3,
+        422.4,
+        435.9
+      ],
+      "medianSteadyWfs": 422.4,
+      "p50Ms": 308,
+      "p99Ms": 370,
+      "cpuCores": 0.3,
+      "meanBatch": 14.92,
+      "maxBatch": 128,
+      "flushShare": 0.324,
+      "executeShare": 0.039,
+      "fsyncMsPerFlush": 2.901,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2817,
+      "diskProbeMs": [
+        2.252,
+        2.114,
+        3.636
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 64,
+      "clients": 256,
+      "workflows": 19200,
+      "steadyWfs": [
+        743.7,
+        768.3,
+        747.2
+      ],
+      "medianSteadyWfs": 747.2,
+      "p50Ms": 329,
+      "p99Ms": 523,
+      "cpuCores": 0.44,
+      "meanBatch": 28.61,
+      "maxBatch": 64,
+      "flushShare": 0.36,
+      "executeShare": 0.081,
+      "fsyncMsPerFlush": 3.445,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8764,
+      "diskProbeMs": [
+        1.923,
+        2.198,
+        2.008
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 64,
+      "clients": 256,
+      "workflows": 19200,
+      "steadyWfs": [
+        770.8,
+        818.0,
+        747.1
+      ],
+      "medianSteadyWfs": 770.8,
+      "p50Ms": 325,
+      "p99Ms": 533,
+      "cpuCores": 0.43,
+      "meanBatch": 28.0,
+      "maxBatch": 256,
+      "flushShare": 0.384,
+      "executeShare": 0.058,
+      "fsyncMsPerFlush": 3.596,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2822,
+      "diskProbeMs": [
+        2.392,
+        4.695,
+        2.304
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 128,
+      "clients": 512,
+      "workflows": 38400,
+      "steadyWfs": [
+        1293.6,
+        1347.8,
+        1303.8
+      ],
+      "medianSteadyWfs": 1303.8,
+      "p50Ms": 359,
+      "p99Ms": 651,
+      "cpuCores": 0.79,
+      "meanBatch": 42.37,
+      "maxBatch": 64,
+      "flushShare": 0.474,
+      "executeShare": 0.143,
+      "fsyncMsPerFlush": 3.807,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8776,
+      "diskProbeMs": [
+        2.513,
+        2.262,
+        2.268
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 128,
+      "clients": 512,
+      "workflows": 38400,
+      "steadyWfs": [
+        1472.7,
+        1429.3,
+        1430.4
+      ],
+      "medianSteadyWfs": 1430.4,
+      "p50Ms": 354,
+      "p99Ms": 509,
+      "cpuCores": 0.66,
+      "meanBatch": 52.92,
+      "maxBatch": 256,
+      "flushShare": 0.371,
+      "executeShare": 0.1,
+      "fsyncMsPerFlush": 3.465,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2827,
+      "diskProbeMs": [
+        2.326,
+        2.242,
+        3.509
+      ]
+    },
+    {
+      "config": "before",
+      "activityMs": 10,
+      "workers": 256,
+      "clients": 1024,
+      "workflows": 76800,
+      "steadyWfs": [
+        2174.7,
+        2360.6,
+        2338.1
+      ],
+      "medianSteadyWfs": 2338.1,
+      "p50Ms": 387,
+      "p99Ms": 893,
+      "cpuCores": 1.21,
+      "meanBatch": 52.47,
+      "maxBatch": 64,
+      "flushShare": 0.668,
+      "executeShare": 0.233,
+      "fsyncMsPerFlush": 3.728,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 8786,
+      "diskProbeMs": [
+        2.967,
+        2.778,
+        2.32
+      ]
+    },
+    {
+      "config": "after",
+      "activityMs": 10,
+      "workers": 256,
+      "clients": 1024,
+      "workflows": 76800,
+      "steadyWfs": [
+        2588.8,
+        2761.8,
+        2666.2
+      ],
+      "medianSteadyWfs": 2666.2,
+      "p50Ms": 373,
+      "p99Ms": 641,
+      "cpuCores": 1.11,
+      "meanBatch": 108.64,
+      "maxBatch": 256,
+      "flushShare": 0.344,
+      "executeShare": 0.171,
+      "fsyncMsPerFlush": 3.507,
+      "transitionsPerWorkflow": 7.0,
+      "walBytesPerWorkflow": 2830,
+      "diskProbeMs": [
+        2.755,
+        2.262,
+        2.481
+      ]
+    }
+  ]
+}
