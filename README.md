@@ -89,7 +89,7 @@ Throughput vs worker count, 1 → 256 workers, every transition `fsync`ed, JDK 2
 - **Where it flattens, and why.** With instant activities, throughput is commands-per-`fsync` ÷ `fsync` time. The previous engine flattened at ~2.7k/s because its batch cap pinned every flush at 64 commands. Lifting the cap and writing field-level patches instead of whole executions (−66% WAL bytes) keeps it scaling to **2.75× at 256 workers**. With 10 ms activities, the engine's own cost is the commit wait, which grows from 1.2 to 6.4 ms per step as batches grow.
 - **More than one process.** A coordinator JVM plus 1–8 separate worker JVMs over HTTP scales 55 → 280 wf/s (10 ms activities) until the processes saturate the laptop's 8 hardware threads. Multi-host remains unmeasured.
 - **Rejected with data:** a partitioned journal (−11% to −53%), pipelined commit (±7%), WAL preallocation (no gain). All stay testable switches.
-- **Latency:** unloaded latency is serial `fsync`s, not CPU. Direct grants (idle workers are assigned work inside the commit that makes it due) cut p50 from 4.87 to **4.24 ms** (−13%) and p99 by 12% at one client. The remaining flushes are each a promised durability point; see [docs/scaling.md#latency](docs/scaling.md#latency).
+- **Latency:** unloaded latency is serial durable writes, not CPU. Two changes took p50 at one client from **4.87 to 1.12 ms (−77%)** with every durability promise intact: direct grants (idle workers get work inside the commit that makes it due) and write-through journal writes (FUA writes instead of whole-cache flushes, 0.66 → 0.15 ms each). See [docs/scaling.md#latency](docs/scaling.md#latency).
 - **Crash recovery:** 200 seeded child-JVM kills, 200/200 recovered, 0 duplicate effects (`benchmarks/chaos.json`).
 
 The LocalStack HTTP run (`benchmarks/http-localstack-400.json`) is functional evidence only: the emulator serializes DynamoDB transactions.
@@ -117,7 +117,7 @@ The LocalStack HTTP run (`benchmarks/http-localstack-400.json`) is functional ev
 | GET | `/api/metrics` | Counts, worker dispatch percentiles, ledger effects |
 | POST | `/api/worker/{claim,heartbeat,complete,effect}` | Journal-mode worker protocol (long-poll claim) |
 
-Configuration (environment): `PORT`, `BIND_ADDRESS`, `API_TOKEN`, `WORKERS`, `LEASE_MS`, `CONDUCTOR_ROLE` (`coordinator`/`worker`), `CONDUCTOR_STORE` (`journal`/`dynamodb`), `DATA_DIR`, `COORDINATOR_URL`, `JOURNAL_SHARDS` (default 1); for DynamoDB: `AWS_REGION`, `CONDUCTOR_TABLE`, `CONDUCTOR_QUEUE`, `CONDUCTOR_BUCKET`, `CONDUCTOR_EVENT_BUS`, `CONDUCTOR_AWS_ENDPOINT` (emulators), `CONDUCTOR_CREATE_RESOURCES`.
+Configuration (environment): `PORT`, `BIND_ADDRESS`, `API_TOKEN`, `WORKERS`, `LEASE_MS`, `CONDUCTOR_ROLE` (`coordinator`/`worker`), `CONDUCTOR_STORE` (`journal`/`dynamodb`), `DATA_DIR`, `COORDINATOR_URL`, `JOURNAL_SHARDS` (default 1), `JOURNAL_SYNC` (`write-through` default, or `flush`); for DynamoDB: `AWS_REGION`, `CONDUCTOR_TABLE`, `CONDUCTOR_QUEUE`, `CONDUCTOR_BUCKET`, `CONDUCTOR_EVENT_BUS`, `CONDUCTOR_AWS_ENDPOINT` (emulators), `CONDUCTOR_CREATE_RESOURCES`.
 
 ## Verification
 
