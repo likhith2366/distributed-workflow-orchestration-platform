@@ -21,7 +21,9 @@ public final class FsyncProbe {
         int seconds=Integer.parseInt(o.getOrDefault("seconds","4"));
         // append: grow the file on every write (file-size metadata must be flushed too);
         // prealloc: overwrite inside an already-sized file, as a segment-preallocating WAL would.
-        boolean prealloc=o.getOrDefault("mode","append").equals("prealloc");
+        // dsync / prealloc-dsync: open with DSYNC (Windows: FILE_FLAG_WRITE_THROUGH) and skip force().
+        String mode=o.getOrDefault("mode","append");
+        boolean prealloc=mode.startsWith("prealloc"),dsync=mode.endsWith("dsync");
         Path dir=Files.createTempDirectory("conductor-fsync-");
         List<Object> rows=new ArrayList<>();
         try {
@@ -36,12 +38,15 @@ public final class FsyncProbe {
                         if(prealloc)try(RandomAccessFile raf=new RandomAccessFile(file.toFile(),"rw")) {
                             byte[] zeros=new byte[1<<20];for(int m=0;m<64;m++)raf.write(zeros);raf.getFD().sync();
                         }
-                        try(FileChannel ch=FileChannel.open(file,StandardOpenOption.CREATE,StandardOpenOption.WRITE)) {
+                        Set<StandardOpenOption> options=new HashSet<>(List.of(StandardOpenOption.CREATE,StandardOpenOption.WRITE));
+                        if(dsync)options.add(StandardOpenOption.DSYNC);
+                        try(FileChannel ch=FileChannel.open(file,options)) {
                             ByteBuffer b=ByteBuffer.allocate(1024);long position=prealloc?0:ch.size();
                             while(System.nanoTime()<deadline) {
                                 b.clear();ch.write(b,position);position+=1024;
                                 if(prealloc&&position>=(64L<<20))position=0;
-                                ch.force(true);counts[id]++;
+                                if(!dsync)ch.force(true);
+                                counts[id]++;
                             }
                         }
                         return null;
@@ -57,7 +62,7 @@ public final class FsyncProbe {
         } finally {Benchmark.deleteQuietly(dir);}
         Map<String,Object> result=new LinkedHashMap<>();
         result.put("os",System.getProperty("os.name"));result.put("java",System.getProperty("java.version"));
-        result.put("fileBytesPerWrite",1024);result.put("mode",prealloc?"prealloc":"append");result.put("secondsPerPoint",seconds);result.put("points",rows);
+        result.put("fileBytesPerWrite",1024);result.put("mode",mode);result.put("secondsPerPoint",seconds);result.put("points",rows);
         if(o.containsKey("out"))Files.writeString(Path.of(o.get("out")),Json.write(result));
     }
 }
