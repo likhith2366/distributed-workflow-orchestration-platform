@@ -8,7 +8,7 @@ Windows 11 workstation, Java 25.0.2 (code compiled for Java 21), 8 JVM-visible p
 
 ## Engine throughput and scaling
 
-Superseded by **[the scaling study](scaling.md)**: 1 → 256 workers in two regimes, before/after interleaved, JDK 21, per-run disk probes. The earlier single-point comparison in this section (653 → 1,041 wf/s at 8 workers) was measured on JDK 25.0.2, whose virtual-thread timer bug (JDK-8370887) can stall threads for seconds. Its raw files are kept in `benchmarks/superseded-jdk25.0.2/` but no longer cited.
+Superseded by **[the benchmark report](benchmark.md)** and [the scaling study](scaling.md): 1 → 256 workers in two regimes, before/after interleaved, JDK 21, per-run disk probes. The earlier single-point comparison in this section (653 → 1,041 wf/s at 8 workers) was measured on JDK 25.0.2, whose virtual-thread timer bug (JDK-8370887) can stall threads for seconds. Those results were removed from the tree (they remain in git history).
 
 ## Process-crash recovery
 

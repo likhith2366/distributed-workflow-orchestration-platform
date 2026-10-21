@@ -159,3 +159,15 @@ All figures: interleaved A/B on JDK 21, medians of 3 (raw files in `benchmarks/s
 - Generational ZGC was worse on this 4-core laptop.
 - The larger batch cap lowers high-load p99 rather than raising it.
 - The first ~300 arrivals of every run carry JIT warm-up latency; including them had made p99 look like 275–330 ms.
+
+## 2026-10-21 — Two headline numbers, and a direct test of the batching tail
+
+**Review feedback:** quote two numbers with conditions stated once; record p50/p99 at every point of the worker sweep; split each request's time into waiting for its batch versus waiting for the write, to test whether the tail is batch formation.
+
+**Done:**
+- `DurableDispatcher` now records, per command, queue wait (including waiting out an in-flight flush), batch formation and the durable write, plus the shares for the slowest 1%.
+- The canonical sweep (concurrency = workers, 1 → 256, write-through, `MaxGCPauseMillis=5`, 3 reps, disk in its fast state throughout) gives the two numbers: **10,100 workflows/s at 256 concurrent; p50 1.36 ms / p99 5.7 ms at one.**
+- **Finding:** at 1–2 concurrent the tail is the device write (53–60% of the slowest commands' time); from 16 up it is batching (75–96%), with queue wait matching a "one full batch ahead plus one write" prediction through 32 concurrent and formation within 2–3× of batch size × per-command cost. At 128–256, GC pauses (4–7% of wall time) turn the following batches into full 256-command batches and inflate both components.
+- The v0.1 (143 wf/s, a harness artifact) and JDK 25.0.2 result folders were removed from the tree.
+
+**Not adopted from the feedback:** the suggested pair "6,885 wf/s and 1.12 / 3.60 ms" mixes a flush-mode, 1,024-client run with an 8-worker, default-GC run. Both headline numbers now come from one sweep instead.

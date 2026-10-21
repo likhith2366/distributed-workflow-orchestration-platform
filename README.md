@@ -74,23 +74,16 @@ LocalStack provides DynamoDB, SQS, S3 and EventBridge; nginx round-robins two st
 
 ## Performance (one laptop, not AWS)
 
-**Canonical configuration**, the only numbers to quote ([docs/benchmark.md](docs/benchmark.md)): shipped defaults, 256 in-process workers, three-step workflow with two durable effects, JDK 21 with `-XX:MaxGCPauseMillis=5`, Intel i5-11300H + consumer NVMe, every transition durable before acknowledgment.
-
 | | |
 |---|---|
-| Peak throughput | **≈ 6,600 workflows/s** |
-| Unloaded latency | **p50 0.98 ms, p99 4.0 ms** |
-| At 50% of capacity | **p50 1.5 ms, p99 15 ms, p99.9 38 ms** |
-| At 75% / 90% of capacity | p99 108 ms / 705 ms (the knee is between 50% and 75%) |
-| Crash recovery | 200 seeded process kills: 200/200 recovered, 0 duplicate effects |
+| **Peak throughput** | **10,100 durable workflows/s** at 256 concurrent workflows |
+| **Latency at one concurrent workflow** | **p50 1.36 ms, p99 5.7 ms** |
 
-![Latency vs load](docs/latency.png)
+Conditions: JDK 21, 4-core laptop, consumer NVMe SSD, write-through journaling, three steps per workflow with two durable effects, every transition durable before acknowledgment. Both numbers come from one sweep. The full throughput-latency curve, the tail decomposition, open-loop latency under load, and why every other figure in the repo is not quoted are in **[docs/benchmark.md](docs/benchmark.md)**.
 
-How it got here, and what was measured and rejected along the way:
-- [scaling study](docs/scaling.md): where throughput flattens and why, and the multi-process run.
-- [latency work](docs/scaling.md#latency): direct grants and write-through journal writes.
-- [tail analysis](docs/benchmark.md#where-the-tail-comes-from): GC and OS pauses amplified by queueing, not batch formation.
-- [durability evidence and its limits](docs/durability.md): FUA behavior measured; power-loss test procedure included but not yet run.
+![Throughput vs latency](docs/curve.png)
+
+Engineering write-ups: [scaling study](docs/scaling.md), [latency work](docs/scaling.md#latency), [durability evidence and limits](docs/durability.md), [decision log](docs/decisions.md).
 
 > Runtime note: use JDK 21 or JDK 25.0.4+. JDK 25.0.2 has a virtual-thread timer bug (JDK-8370887) that stalled this service for seconds under load; the service logs a warning on affected builds.
 
