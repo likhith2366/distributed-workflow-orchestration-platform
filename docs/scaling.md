@@ -95,6 +95,32 @@ Everything here is **one laptop**. The multi-process results add separate JVMs a
 - **Instant activities are flat at ~240–325 wf/s and CPU-bound** (5.8–7.2 threads busy). Every step now costs three HTTP round trips plus JSON on both ends. In-process, the same engine does 5,000+. The protocol, not the durability path, is the remote-worker bottleneck, and the obvious next optimization is a batched claim/complete call, so one round trip carries many tasks.
 - **The same 32 workers do 422 wf/s in-process and 280 as separate JVMs** (10 ms activities): that's the cost of process isolation on one machine.
 
+## Latency
+
+**Unloaded, latency is serial `fsync`s.** With one client, one three-step workflow (two effects) paid about **7 durable flushes in series**: start, first claim, then effect and complete-and-claim-next twice, then the final completion. At ~0.65 ms per `fsync` on this SSD, that accounts for nearly all of the measured ~4.9 ms p50. CPU is not the issue; the number of round trips in series is.
+
+**Direct grants.** Previously an idle worker was woken after a start became durable and then spent a flush of its own claiming the task. Now idle workers park inside the engine, and the writer assigns them due tasks *in the same batch* that made the tasks due. Start and first claim share one `fsync`, and a grant is released only once durable. The previous wake-then-claim path stays available as `-Dconductor.directGrant=false`.
+
+Interleaved, 5 reps each, JDK 21, 8 workers, instant activities, microsecond timing (`benchmarks/latency/`):
+
+| Concurrent clients | p50 wake-then-claim | p50 direct grant | p99 wake-then-claim | p99 direct grant |
+|---:|---:|---:|---:|---:|
+| 1 | 4.87 ms | **4.24 ms (−13%)** | 9.42 ms | **8.27 ms (−12%)** |
+| 4 | 7.53 ms | **6.71 ms (−11%)** | 14.24 ms | **13.37 ms (−6%)** |
+
+Engine `fsync`s per workflow at 1 client: 4.85 → 4.00.
+
+**What remains.** About 6 serial `fsync`s × 0.65 ms ≈ 3.9 ms of the 4.24 ms p50. Each one is a durability point the engine promises:
+- a start is durable before it's acknowledged;
+- an effect is durable in the ledger before its completion is recorded;
+- a step starts only after its dependencies have durably succeeded.
+
+Going lower means relaxing one of those promises, and that was deliberately **not done**:
+- *Speculative next step* (start step N+1 while step N's completion is still flushing) would save ~2 flushes per workflow (≈ −30%). The cost: step N+1's side effects could happen before step N's success is durable. If the coordinator then crashed and step N failed on retry, a downstream system would see effects out of causal order.
+- *Asynchronous effect acknowledgment* would remove the ledger flushes from the critical path but break effect-before-completion.
+
+Hardware is the other lever: a server SSD with power-loss protection acknowledges `fsync` in tens of microseconds instead of ~0.65 ms, which would shrink this whole budget about tenfold without changing any semantics.
+
 ## Things that were tried and rejected (all JDK 21, interleaved)
 
 | Option | Effect | Status |

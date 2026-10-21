@@ -124,3 +124,13 @@ All figures: interleaved A/B on JDK 21, medians of 3 (raw files in `benchmarks/s
 **Cause:** JDK-8370887, "DelayScheduler.replace method may break the 4-ary heap in certain scenarios". Long polls and idle-worker waits are exactly the cancel-early pattern.
 
 **Decision:** all JDK 25.0.2 measurements from this session were discarded; the study was rerun on JDK 21 (the Docker/CI runtime). The service logs a warning at startup on JDK 25 builds before 25.0.4.
+
+## 2026-10-20 — Latency: remove a serial flush, keep every durability promise
+
+**Observation:** unloaded latency (one client) was ~7 serial `fsync`s per three-step workflow; CPU was negligible. One of those flushes existed only because an idle worker was woken after a start was durable and then committed its own claim.
+
+**Decision:** direct grants. Idle workers park in the engine, and the writer assigns them due tasks inside the batch that made the tasks due; a grant is released after that batch's flush. p50 −13% and p99 −12% at one client, −11% p50 at four (interleaved, 5 reps, `benchmarks/latency/`).
+
+**Rejected:** speculative execution of the next step before the previous completion is durable (≈ −30% latency, but downstream effects could precede a durable success of their dependency), and asynchronous effect acknowledgment (breaks effect-before-completion). Both trade correctness for speed; neither was implemented.
+
+**Also found:** the Maven pom hard-coded the Surefire `argLine`, silently ignoring `-DargLine`, so an earlier "tests pass in pipelined mode" check had not actually run pipelined mode for the engine tests. The pom now takes `-Dconductor.testArgs=...`, and all four engine modes (default, pipelined, wake-then-claim, previous-engine) are run against the same 37 tests.
