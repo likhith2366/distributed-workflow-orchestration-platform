@@ -144,3 +144,18 @@ All figures: interleaved A/B on JDK 21, medians of 3 (raw files in `benchmarks/s
 **Rejected:** preallocated segments (a further ~2× in the probe) because a torn write inside preallocated space is indistinguishable from corruption of the last acknowledged frame, which the journal currently fails closed on.
 
 **Escape hatch:** `JOURNAL_SYNC=flush` for storage stacks that do not honor FUA.
+
+## 2026-10-20 — One canonical benchmark; latency measured open-loop to saturation
+
+**Problem:** the docs quoted throughput from five different harnesses, worker counts, task types and sync modes, and latency was measured only at low concurrency, in closed loop, where it mostly reflects the number of clients.
+
+**Decision:** [benchmark.md](benchmark.md) defines one canonical configuration and is the only source for headline numbers. Latency is measured open-loop at fixed fractions of capacity, from intended arrival time, excluding warm-up.
+
+**Method correction:** the first open-loop sweep offered fractions of a peak measured earlier while the SSD was in its fast state. When the disk slowed, "75% of peak" became overload and p99 reached seconds. It was discarded; each open-loop run now offers a fraction of capacity measured immediately before it.
+
+**Findings:**
+- The tail is GC and OS pauses amplified by queueing (attribution: slow workflows overlap GC pauses 14–42× more often than the base rate). Batch formation is under 1 ms at p99 up to 50% load.
+- `-XX:MaxGCPauseMillis=5` halved p99 at equal p50 and CPU and is now the shipped JVM setting.
+- Generational ZGC was worse on this 4-core laptop.
+- The larger batch cap lowers high-load p99 rather than raising it.
+- The first ~300 arrivals of every run carry JIT warm-up latency; including them had made p99 look like 275–330 ms.

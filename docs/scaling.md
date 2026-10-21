@@ -1,5 +1,7 @@
 # Scaling study: throughput vs worker count
 
+> Headline numbers live in [benchmark.md](benchmark.md) (one canonical configuration). This page explains how the engine got there; its figures come from other configurations and are not for quoting.
+
 **Question:** does durable throughput scale with workers, and if not, where does it flatten and why?
 **Short answer:**
 - **Workers that wait on a downstream call** (10 ms activities): throughput keeps rising to 256 workers, 20 → 2,666 workflows/s, at 51% efficiency against linear.
