@@ -1,0 +1,9 @@
+*
+!pom.xml
+!src/
+!src/**
+!console/
+!console/**
+console/node_modules
+console/dist
+!Dockerfile

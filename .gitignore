@@ -1,0 +1,16 @@
+target/
+build/
+data/
+tmp/
+node_modules/
+console/dist/
+cdk.out/
+infra/dist/
+*.log
+.env
+__pycache__/
+output/
+/*.pdf
+.vscode/
+.idea/
+*.tsbuildinfo
