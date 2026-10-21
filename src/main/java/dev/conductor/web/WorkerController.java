@@ -28,16 +28,14 @@ class WorkerController {
         Map<String,Object> body=JsonHttp.body(request);
         String owner=Json.str(body,"owner","");
         long waitMs=Math.min(Math.min(MAX_WAIT_MS,leaseMs/3),Math.max(0,Json.num(body,"waitMs",0)));
-        WorkflowEngine engine=backend.engine();
+        LocalEngine journal=backend.journal().orElse(null);
         long deadline=System.currentTimeMillis()+waitMs;
         while(true) {
-            LocalEngine journal=backend.journal().orElse(null);
-            long generation=journal==null?0:journal.workGeneration();
-            Claim claim=engine.claim(owner,System.currentTimeMillis(),leaseMs);
-            if(claim!=null)return JsonHttp.ok(claim.toWire());
             long remaining=deadline-System.currentTimeMillis();
-            if(remaining<=0||journal==null)return JsonHttp.ok(Map.of());
-            journal.awaitWork(generation,remaining);
+            Claim claim=journal==null?backend.engine().claim(owner,System.currentTimeMillis(),leaseMs)
+                    :journal.claimOrWait(owner,leaseMs,Math.max(0,remaining));
+            if(claim!=null)return JsonHttp.ok(claim.toWire());
+            if(journal==null||deadline-System.currentTimeMillis()<=0)return JsonHttp.ok(Map.of());
         }
     }
     @PostMapping("/heartbeat")

@@ -37,9 +37,8 @@ public final class EmbeddedWorkers implements AutoCloseable {
         while(!stopping.get())try {
             Claim claim=next;next=null;
             if(claim==null) {
-                long generation=engine.workGeneration();
-                claim=engine.claim(owner,System.currentTimeMillis(),leaseMs);
-                if(claim==null){engine.awaitWork(generation,50);continue;}
+                claim=engine.claimOrWait(owner,leaseMs,50);
+                if(claim==null)continue;
             }
             next=run(owner,claim);
         } catch(InterruptedException e){Thread.currentThread().interrupt();return;}
