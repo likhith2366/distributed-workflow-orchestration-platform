@@ -42,6 +42,7 @@ public final class DurableDispatcher implements AutoCloseable {
         void fail(IOException e){reply.completeExceptionally(e);}
     }
     private static final class Batch {
+        long opened;
         final List<Command<?>> commands=new ArrayList<>();
         final ByteArrayOutputStream frames=new ByteArrayOutputStream();
         final List<Runnable> after=new ArrayList<>();
@@ -67,6 +68,9 @@ public final class DurableDispatcher implements AutoCloseable {
     private final boolean pipelined=Boolean.getBoolean("conductor.pipelinedCommit");
     // Utilisation, for explaining where throughput stops scaling.
     private volatile long batches,commands,executeNanos,flushNanos,maxSeen;
+    // Batch formation: commands per batch, and time from a batch's first command to its durability.
+    private final dev.conductor.core.LatencyRecorder batchSizes=new dev.conductor.core.LatencyRecorder(65_536),
+            batchLatency=new dev.conductor.core.LatencyRecorder(65_536);
 
     public DurableDispatcher(String name,Log log) {
         this.log=log;
@@ -118,6 +122,7 @@ public final class DurableDispatcher implements AutoCloseable {
                     // Backpressure: never let the open batch grow without bound behind a slow disk.
                     while(open.commands.size()>=maxBatch&&failed==null)lock.wait();
                     if(failed!=null){command.fail(failed);continue;}
+                    if(open.commands.isEmpty())open.opened=begin;
                     open.commands.add(command);
                     if(staged.frames().length>0)open.frames.writeBytes(staged.frames());
                     open.records+=staged.records();
@@ -165,7 +170,8 @@ public final class DurableDispatcher implements AutoCloseable {
             return;
         }
         batch.commands.forEach(Command::finish);
-        batches++;commands+=batch.commands.size();
+        batches++;commands+=batch.commands.size();batchSizes.record(batch.commands.size());
+        batchLatency.recordMicros(System.nanoTime()-batch.opened);
         if(batch.commands.size()>maxSeen)maxSeen=batch.commands.size();
     }
     private void poison(IOException e) {
@@ -184,6 +190,7 @@ public final class DurableDispatcher implements AutoCloseable {
         Map<String,Object> m=new LinkedHashMap<>();
         m.put("batches",b);m.put("commands",c);m.put("meanBatch",b==0?0.0:(double)c/b);m.put("maxBatch",maxSeen);
         m.put("executeMs",executeNanos/1_000_000);m.put("flushMs",flushNanos/1_000_000);
+        m.putAll(batchSizes.snapshot("batchSize"));m.putAll(batchLatency.snapshot("batchOpenToDurableMicros"));
         return m;
     }
     @Override public void close()throws IOException {
