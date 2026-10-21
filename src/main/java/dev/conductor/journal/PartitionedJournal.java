@@ -110,7 +110,7 @@ public final class PartitionedJournal {
                 Map<String,Object> m=s.stats();
                 executions+=Json.num(m,"executions",0);active+=Json.num(m,"active",0);transitions+=Json.num(m,"durableTransitions",0);
                 Json.obj(m.get("statuses")).forEach((k,v)->statuses.merge(k,((Number)v).longValue(),Long::sum));
-                Json.obj(m.get("journal")).forEach((k,v)->journal.merge(k,((Number)v).longValue(),Long::sum));
+                Json.obj(m.get("journal")).forEach((k,v)->{if(v instanceof Number n)journal.merge(k,n.longValue(),Long::sum);});
                 Json.obj(m.get("writer")).forEach((k,v)->{if(!k.equals("meanBatch"))writer.merge(k,((Number)v).longValue(),k.equals("maxBatch")?Math::max:Long::sum);});
             }
             Map<String,Object> w=new LinkedHashMap<>(writer);
