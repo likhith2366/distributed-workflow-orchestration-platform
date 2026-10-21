@@ -111,7 +111,7 @@ public final class ClusterBenchmark {
         return http.send(b.build(),HttpResponse.BodyHandlers.ofString());
     }
     static Process spawn(String java,Path jar,Path log,Map<String,String> env,String heap)throws IOException {
-        ProcessBuilder pb=new ProcessBuilder(java,heap,"-jar",jar.toAbsolutePath().toString())
+        ProcessBuilder pb=new ProcessBuilder(java,heap,"-XX:MaxGCPauseMillis=5","-jar",jar.toAbsolutePath().toString())
                 .redirectErrorStream(true).redirectOutput(log.toFile());
         pb.environment().putAll(env);
         pb.environment().put("API_TOKEN",TOKEN);pb.environment().put("BIND_ADDRESS","127.0.0.1");
