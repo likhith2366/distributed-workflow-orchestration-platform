@@ -58,7 +58,7 @@ public final class Benchmark {
                     }
                     if(!status.equals("SUCCEEDED"))throw new IllegalStateException("Benchmark execution failed: "+status);
                     long end=System.nanoTime();
-                    latencies[i]=(end-start)/1_000_000;finished[i]=end;
+                    latencies[i]=(end-start)/1_000;finished[i]=end;
                 }
                 return null;
             }));
@@ -80,8 +80,11 @@ public final class Benchmark {
         result.put("workflows",count);result.put("stepsPerWorkflow",3);result.put("activityMs",activityMs);result.put("ledgerEffects",count*2);
         result.put("workers",workerCount);result.put("clients",clients);result.put("journalShards",shards);result.put("seconds",seconds);
         result.put("workflowsPerSecond",count/seconds);result.put("steadyWorkflowsPerSecond",steady);
-        result.put("workflowP50Ms",LatencyRecorder.percentile(latencies,.50));
-        result.put("workflowP99Ms",LatencyRecorder.percentile(latencies,.99));
+        // Recorded in microseconds: unloaded latency is a handful of ~1 ms fsyncs.
+        result.put("workflowP50Ms",LatencyRecorder.percentile(latencies,.50)/1000);
+        result.put("workflowP99Ms",LatencyRecorder.percentile(latencies,.99)/1000);
+        result.put("workflowP50Micros",LatencyRecorder.percentile(latencies,.50));
+        result.put("workflowP99Micros",LatencyRecorder.percentile(latencies,.99));
         result.put("processCpuSeconds",cpuSeconds);result.put("processCpuCores",cpuSeconds/seconds);
         result.put("workersMetrics",workerMetrics);result.put("engineMetrics",engineMetrics);result.put("ledgerMetrics",ledgerMetrics);
         result.put("batchSizeLimit",Integer.getInteger("conductor.batchSize",64));
