@@ -134,3 +134,13 @@ All figures: interleaved A/B on JDK 21, medians of 3 (raw files in `benchmarks/s
 **Rejected:** speculative execution of the next step before the previous completion is durable (≈ −30% latency, but downstream effects could precede a durable success of their dependency), and asynchronous effect acknowledgment (breaks effect-before-completion). Both trade correctness for speed; neither was implemented.
 
 **Also found:** the Maven pom hard-coded the Surefire `argLine`, silently ignoring `-DargLine`, so an earlier "tests pass in pipelined mode" check had not actually run pipelined mode for the engine tests. The pom now takes `-Dconductor.testArgs=...`, and all four engine modes (default, pipelined, wake-then-claim, previous-engine) are run against the same 37 tests.
+
+## 2026-10-20 — Write-through WAL writes instead of write-then-flush
+
+**Observation:** after direct grants, unloaded latency was still ~6 serial durable writes at ~0.65 ms each. `force()` on Windows is `FlushFileBuffers`, which drains the device's whole volatile cache. A device probe measured 0.63 ms for append + flush and 0.11 ms for append with `DSYNC` (FUA writes).
+
+**Decision:** open journals with `DSYNC` by default. Microsoft documents that write-through also flushes file metadata (so appends that grow the file stay recoverable), and Linux `O_DSYNC` likewise covers the metadata needed to read data back. Recovery semantics are unchanged; a recovery-time truncation of a torn tail is now also forced. p50 at one client 4.20 → 1.12 ms; throughput +22–38% under saturation; 200/200 crash recoveries.
+
+**Rejected:** preallocated segments (a further ~2× in the probe) because a torn write inside preallocated space is indistinguishable from corruption of the last acknowledged frame, which the journal currently fails closed on.
+
+**Escape hatch:** `JOURNAL_SYNC=flush` for storage stacks that do not honor FUA.

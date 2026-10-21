@@ -110,16 +110,28 @@ Interleaved, 5 reps each, JDK 21, 8 workers, instant activities, microsecond tim
 
 Engine `fsync`s per workflow at 1 client: 4.85 → 4.00.
 
-**What remains.** About 6 serial `fsync`s × 0.65 ms ≈ 3.9 ms of the 4.24 ms p50. Each one is a durability point the engine promises:
-- a start is durable before it's acknowledged;
-- an effect is durable in the ledger before its completion is recorded;
-- a step starts only after its dependencies have durably succeeded.
+**Write-through journal writes.** With one round trip removed, latency was ~6 serial flushes × 0.65 ms, so the next lever was the cost of each durable write. `force()` maps to `FlushFileBuffers` on Windows, which drains the SSD's entire write cache. Opening the WAL with `DSYNC` (Windows `FILE_FLAG_WRITE_THROUGH`, which NTFS issues as FUA writes; Linux `O_DSYNC`) makes each write durable on its own. Microsoft documents that write-through also covers file metadata such as the new size ([file caching](https://learn.microsoft.com/windows/win32/fileio/file-caching)), so plain appends keep today's recovery semantics unchanged.
 
-Going lower means relaxing one of those promises, and that was deliberately **not done**:
-- *Speculative next step* (start step N+1 while step N's completion is still flushing) would save ~2 flushes per workflow (≈ −30%). The cost: step N+1's side effects could happen before step N's success is durable. If the coordinator then crashed and step N failed on retry, a downstream system would see effects out of causal order.
-- *Asynchronous effect acknowledgment* would remove the ledger flushes from the critical path but break effect-before-completion.
+Device probe first (`FsyncProbe`, 1 KiB writes, 1 thread): append + `force()` 0.63 ms; append + write-through **0.11 ms**; preallocated + write-through 0.06 ms. Preallocation would buy another ~2×, but a torn write inside zero-filled space can't be told apart from corruption of the last acknowledged frame. That would trade the journal's fail-closed check for speed, so it was not taken.
 
-Hardware is the other lever: a server SSD with power-loss protection acknowledges `fsync` in tens of microseconds instead of ~0.65 ms, which would shrink this whole budget about tenfold without changing any semantics.
+Engine, interleaved, 5 reps, JDK 21, 8 workers, direct grants on in both columns (`benchmarks/latency/write-through/`):
+
+| Concurrent clients | p50 flush | p50 write-through | p99 flush | p99 write-through | Throughput |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 4.20 ms | **1.12 ms (−73%)** | 8.64 ms | **3.60 ms** | 228 → 789 wf/s |
+| 4 | 6.41 ms | **1.99 ms (−69%)** | 14.34 ms | **7.00 ms** | 626 → 1,966 wf/s |
+| 16 | 14.99 ms | **4.80 ms (−68%)** | 28.25 ms | **19.49 ms** | 1,060 → 3,249 wf/s |
+
+Each durable write fell from ~0.66 ms to ~0.15 ms. Under saturation it also lifts throughput: +38% at 64 workers and +22% at 256 (interleaved, 3 reps, taken while the disk was in its fast state). The 200-kill crash harness passes on write-through (200/200, 0 duplicate effects). `JOURNAL_SYNC=flush` restores `FlushFileBuffers`/`fsync` for storage that does not honor FUA (the Old New Thing post above notes old SATA/IDE drivers that ignored it). Write-through is exactly as trustworthy as the device's FUA, just as flush mode depends on the device honoring cache flushes.
+
+**From 4.87 ms to 1.12 ms p50 at one client (−77%)**, with every durability promise intact: a start is durable before it is acknowledged, an effect before its completion, and a step starts only after its dependencies durably succeeded.
+
+**What was deliberately not done.**
+- *Speculative next step* (start step N+1 while step N's completion is still being written) would remove ~2 serial writes. The cost: a downstream system could observe step N+1's effect even though step N later failed on a post-crash retry.
+- *Asynchronous effect acknowledgment* would break effect-before-completion.
+- *Preallocated WAL segments*: as above, the cost is fail-closed detection of a corrupt final frame.
+
+The scaling study above was measured with flush mode, before this change; its curves are conservative for the current default.
 
 ## Things that were tried and rejected (all JDK 21, interleaved)
 
