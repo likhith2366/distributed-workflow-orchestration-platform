@@ -1,7 +1,17 @@
 # Durability: what is verified, what is trusted, and how to check the rest
 
 **Short answer to "did you verify that the SSD honors write-through, or are you trusting the spec?":**
-Partly verified, partly trusted, and here is exactly which part is which.
+- **The OS-level guarantee: verified**, from Microsoft's and Linux's documentation.
+- **The hardware: not verified.** That needs a power-loss rig, which I don't have.
+- **But this is not a new risk.** The previous journal's `fsync` depended on the drive obeying a cache-flush command; the write-through journal depends on it obeying the force-unit-access flag. A drive that does not honor FUA generally does not honor flush either, so the same trust moved from one command to the other. If the drive lies, both versions were already unsafe.
+- **`JOURNAL_SYNC=flush`** remains for deployments that trust flush but not FUA.
+
+Two cheap checks were also done:
+
+| Check | Result |
+|---|---|
+| Is Windows' "turn off write-cache buffer flushing" enabled for this drive? (If it were, `FlushFileBuffers` would not reach the device and flush-mode numbers would be meaningless.) | **No.** The per-device registry policy (`CacheIsPowerProtected`, `UserWriteCacheSetting` under the drive's `Device Parameters\Disk` key) is unset, i.e. Windows defaults. Independently, a flush measurably costs 609–666 µs against 4 µs for a cached write, which could not happen if flushes were being skipped. |
+| Does the drive advertise power-loss protection? | **No.** Windows does not mark the cache as power-protected. Samsung documents PLP for its data-center drives (e.g. PM893/PM897), not for the PM991a client drive; consumer and client NVMe almost never has it. |
 
 ## What the journal asks for
 
