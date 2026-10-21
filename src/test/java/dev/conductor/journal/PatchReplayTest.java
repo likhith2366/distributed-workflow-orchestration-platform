@@ -47,7 +47,8 @@ class PatchReplayTest {
             long full=ids.stream().filter(id->Workflow.terminal(Json.str(snapshot.containsKey(id)?Json.obj(Json.parse(snapshot.get(id))):Map.of(),"status",""))).count();
             assertTrue(full>0,"workload reached terminal states");
             long bytes=Json.num(Json.obj(e.stats().get("journal")),"bytes",0),records=Json.num(Json.obj(e.stats().get("journal")),"records",0);
-            assertTrue(bytes/records<600,"patch records are small: "+bytes/records+" bytes/record");
+            if(!Boolean.getBoolean("conductor.fullProjectionRecords"))
+                assertTrue(bytes/records<600,"patch records are small: "+bytes/records+" bytes/record");
         }
         try(JournalEngine e=new JournalEngine(dir)) {
             for(var entry:snapshot.entrySet())assertEquals(entry.getValue(),Json.write(e.get(entry.getKey())),"replayed "+entry.getKey());

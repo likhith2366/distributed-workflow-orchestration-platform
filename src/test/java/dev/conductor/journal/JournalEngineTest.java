@@ -176,6 +176,24 @@ class JournalEngineTest {
             assertEquals("SUCCEEDED",e.get(id).get("status"));
         }
     }
+    @Test void parkedWorkerIsGrantedWorkInTheSameFlushThatMadeItDue()throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeFalse("false".equals(System.getProperty("conductor.directGrant")),"direct grants disabled");
+        try(JournalEngine e=new JournalEngine(dir());ExecutorService pool=Executors.newVirtualThreadPerTaskExecutor()) {
+            Future<Claim> parked=pool.submit(()->e.claimOrWait("idle-worker",10_000,5_000));
+            long deadline=System.nanoTime()+5_000_000_000L;
+            // Wait until the worker is parked (its registration command has been flushed).
+            while(Json.num(Json.obj(e.stats().get("writer")),"commands",0)<1&&System.nanoTime()<deadline)Thread.sleep(1);
+            Thread.sleep(50);
+            long flushes=Json.num(Json.obj(e.stats().get("journal")),"flushes",0);
+            String id=e.start(def("[{\"id\":\"a\"}]"),"grant",System.currentTimeMillis());
+            Claim claim=parked.get(5,TimeUnit.SECONDS);
+            assertEquals(id,claim.execution());
+            assertEquals(flushes+1,Json.num(Json.obj(e.stats().get("journal")),"flushes",0),"start and claim share one fsync");
+            assertEquals("RUNNING",Json.obj(Json.obj(e.get(id).get("tasks")).get("a")).get("status"),"grant is durable before release");
+            assertNull(e.claimOrWait("late",10_000,20),"nothing left: times out and withdraws");
+            assertTrue(e.complete(claim,1,null,System.currentTimeMillis()));
+        }
+    }
     @Test void statsTrackCommittedStatusCounts()throws Exception {
         try(JournalEngine e=new JournalEngine(dir())) {
             String id=e.start(def("[{\"id\":\"a\"}]"),"s1",0);
