@@ -1,0 +1,1 @@
+{"os":"Windows 11","java":"21.0.2","fileBytesPerWrite":1024,"mode":"direct-dsync","secondsPerPoint":3,"points":[{"threads":1,"fsyncsPerSecond":15123.666666666666,"meanFsyncMs":0.06612153137466664}]}
